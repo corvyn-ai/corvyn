@@ -85,6 +85,7 @@ API keys support env var resolution: `api_key = "$GEMINI_API_KEY"` or `api_key =
 | OpenCode Go | paid | $OPENCODE_GO_API_KEY | subscription limits |
 | OpenCode Zen (free) | free | $OPENCODE_ZEN_API_KEY | none |
 | OpenCode Zen (paid) | paid | $OPENCODE_ZEN_API_KEY | pay-as-you-go |
+| Cloudflare AI Gateway | paid | $CF_AIG_API_TOKEN | rpm, rpd (local tracking) |
 | Anthropic | paid | $ANTHROPIC_API_KEY | none |
 | OpenAI | paid | $OPENAI_API_KEY | none |
 | DeepSeek | paid | $DEEPSEEK_API_KEY | none |
@@ -125,6 +126,31 @@ Pay-as-you-go gateway at `https://opencode.ai/zen/v1/chat/completions`.
 - Paid models: Qwen3.5/3.6 Plus, MiniMax M2.7, Kimi K2.6, GLM 5.1
 - Only OpenAI-compatible models supported (Claude/GPT models use different endpoints)
 
+### Cloudflare AI Gateway Integration
+
+Unified OpenAI-compatible proxy at `https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/compat/chat/completions`.
+
+- Uses `cloudflare-ai` in routing rules
+- Routes through Cloudflare's edge network — adds caching, analytics, rate limiting, guardrails, DLP
+- Models use `{provider}/{model}` format: `openai/gpt-4o`, `anthropic/claude-sonnet-4.5`, `google-ai-studio/gemini-2.5-flash`
+- Auth: `cf-aig-authorization: Bearer {CF_AIG_TOKEN}` header always sent for gateway auth
+- Supported upstream providers: OpenAI, Anthropic, Google AI Studio, Groq, Mistral, DeepSeek, Cerebras, xAI, Workers AI, OpenRouter, Cohere, Perplexity
+- Local quota tracking (rpm/rpd) still applies — Corvyn tracks usage locally even though CF also tracks server-side
+- Cost calculated locally from token counts (CF analytics available separately in CF dashboard)
+- Config: `account_id`, `gateway_id`, `api_token`, `mode`, `models[]`, optional `provider_keys`
+
+**Three modes:**
+
+| Mode | Authorization header | Provider keys stored in... |
+|---|---|---|
+| `unified` (default) | Not sent | Nowhere — CF bills from loaded credits |
+| `byok` | Not sent | CF dashboard (BYOK / Store Keys) |
+| `passthrough` | Provider API key from `provider_keys` table | Your `.env` / corvyn config |
+
+- `unified` — Load credits into CF account, CF handles provider billing. Simplest setup.
+- `byok` — Store provider API keys in CF dashboard under Provider Keys. CF injects them at runtime.
+- `passthrough` — Corvyn sends provider keys via `Authorization` header. Keys come from `[providers.cloudflare_ai.provider_keys]` table, mapped by provider prefix (e.g. `openai = "$OPENAI_API_KEY"`).
+
 ### Task Categories
 - `security` — auth/encrypt/jwt/xss/csrf/injection keywords
 - `debug` — fix/bug/error/crash/"not working" keywords
@@ -151,6 +177,8 @@ simple:    cerebras → openrouter-free → opencode-go → gemini
 
 When `opencode-zen` is enabled, `opencode-zen-free` and `opencode-zen-paid` can be added to routing rules.
 
+When `cloudflare-ai` is enabled, `cloudflare-ai` can be added to routing rules. It iterates through all configured models in order.
+
 ### Quota Rules
 - Quota incremented **only after** successful response (not before)
 - Auto-resets at midnight local time
@@ -160,6 +188,7 @@ When `opencode-zen` is enabled, `opencode-zen-free` and `opencode-zen-paid` can 
 - **RPD**: requests since midnight (free providers)
 - **TPM**: tokens since start of month (Mistral)
 - **OpenRouter/OpenCode**: no local tracking, server handles limits
+- **Cloudflare AI Gateway**: local rpm/rpd tracking (optional), CF also tracks server-side
 - **Ollama/Paid**: no tracking needed
 
 ### Cost Tracking

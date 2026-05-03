@@ -154,6 +154,29 @@ models    = [
 #   "glm-5.1",
 # ]
 
+
+
+# [providers.cloudflare_ai]
+# enabled    = true
+# account_id = "$CF_ACCOUNT_ID"
+# gateway_id = "$CF_GATEWAY_ID"
+# api_token  = "$CF_AIG_API_TOKEN"
+# mode       = "unified"
+# rpm        = 60
+# rpd        = 5000
+# models     = [
+#   "workers-ai/@cf/moonshotai/kimi-k2.6",
+#   "workers-ai/@cf/moonshotai/kimi-k2.5",
+#   "workers-ai/@cf/openai/gpt-oss-120b",
+#   "workers-ai/@cf/openai/gpt-oss-20b",
+#   "workers-ai/@cf/nvidia/nemotron-3-120b-a12b",
+#   "workers-ai/@cf/qwen/qwen2.5-coder-32b-instruct",
+#   "workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+# ]
+
+
+
+
 [routing]
 # Priority: free tiers → opencode-go (subscription) → paid fallbacks
 security = ["openrouter-free", "opencode-go", "openrouter-paid"]

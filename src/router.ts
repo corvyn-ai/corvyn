@@ -263,7 +263,7 @@ function createSSEProxy(upstream: ReadableStream<Uint8Array>, ctx: StreamCtx): R
                 const tokIn = (u.prompt_tokens as number) ?? 0;
                 const tokOut = (u.completion_tokens as number) ?? 0;
                 const orCost = (u.cost as number) ?? 0;
-                const costUsd = orCost > 0 ? orCost : calculateCost(ctx.provider.name, tokIn, tokOut);
+                const costUsd = orCost > 0 ? orCost : calculateCost(ctx.provider.name, tokIn, tokOut, ctx.provider.modelId);
                 const savedUsd = calculateSavings(costUsd, tokIn, tokOut);
                 const latency = Date.now() - ctx.startTime;
                 try {
@@ -308,9 +308,20 @@ async function tryProvider(
   const url = `${provider.baseUrl}/chat/completions`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(provider.apiKey ? { Authorization: `Bearer ${provider.apiKey}` } : {}),
     ...(provider.headers ?? {}),
   };
+
+  // Cloudflare AI Gateway uses cf-aig-authorization for gateway auth
+  // and does NOT need a separate Authorization header when using BYOK
+  if (provider.name === 'cloudflare-ai') {
+    // cf-aig-authorization is already set in provider.headers
+    // In passthrough mode, apiKey holds the provider key → set Authorization
+    if (provider.apiKey) {
+      headers.Authorization = `Bearer ${provider.apiKey}`;
+    }
+  } else if (provider.apiKey) {
+    headers.Authorization = `Bearer ${provider.apiKey}`;
+  }
 
   // Strip non-standard fields from messages that some providers reject
   const cleanedMessages = (parsed.messages as Array<Record<string, unknown>>).map((msg) => {

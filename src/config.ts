@@ -45,6 +45,20 @@ export interface OllamaConfig {
   models: string[];
 }
 
+export type CloudflareAIGatewayMode = 'byok' | 'unified' | 'passthrough';
+
+export interface CloudflareAIGatewayConfig {
+  enabled: boolean;
+  account_id: string;
+  gateway_id: string;
+  api_token: string;
+  mode: CloudflareAIGatewayMode;
+  models: string[];
+  rpm?: number;
+  rpd?: number;
+  provider_keys?: Record<string, string>;
+}
+
 // ── Routing ─────────────────────────────────────────────────────────
 
 export interface OpenRouterModelsConfig {
@@ -105,6 +119,7 @@ export interface CorvynConfig {
     opencode_go: OpenCodeGoConfig;
     opencode_zen: OpenCodeZenConfig;
     ollama: OllamaConfig;
+    cloudflare_ai: CloudflareAIGatewayConfig;
   };
   routing: RoutingConfig;
 }
@@ -160,6 +175,19 @@ const DEFAULT_OLLAMA: OllamaConfig = {
   models: ['qwen2.5-coder:7b'],
 };
 
+const DEFAULT_CLOUDFLARE_AI: CloudflareAIGatewayConfig = {
+  enabled: false,
+  account_id: '',
+  gateway_id: 'default',
+  api_token: '',
+  mode: 'unified',
+  models: [
+    'openai/gpt-4o',
+    'anthropic/claude-sonnet-4.5',
+    'google-ai-studio/gemini-2.5-flash',
+  ],
+};
+
 const DEFAULT_ROUTING: RoutingConfig = {
   security: ['anthropic', 'opencode-go', 'opencode-zen-paid', 'openrouter-paid', 'openrouter-free', 'opencode-zen-free', 'ollama'],
   complex: ['openrouter-free', 'opencode-zen-free', 'opencode-go', 'opencode-zen-paid', 'openrouter-paid', 'anthropic', 'ollama'],
@@ -206,6 +234,7 @@ export function getDefaultConfig(): CorvynConfig {
       opencode_go: DEFAULT_OPENCODE_GO,
       opencode_zen: DEFAULT_OPENCODE_ZEN,
       ollama: DEFAULT_OLLAMA,
+      cloudflare_ai: DEFAULT_CLOUDFLARE_AI,
     },
     routing: DEFAULT_ROUTING,
   };
@@ -305,6 +334,39 @@ function mergeOllama(raw: unknown): OllamaConfig {
   };
 }
 
+function mergeCloudflareAI(raw: unknown): CloudflareAIGatewayConfig {
+  if (typeof raw !== 'object' || raw === null) return { ...DEFAULT_CLOUDFLARE_AI };
+  const r = raw as Record<string, unknown>;
+
+  const rawMode = (r.mode as string) ?? DEFAULT_CLOUDFLARE_AI.mode;
+  const mode: CloudflareAIGatewayMode =
+    rawMode === 'byok' || rawMode === 'unified' || rawMode === 'passthrough'
+      ? rawMode
+      : DEFAULT_CLOUDFLARE_AI.mode;
+
+  let providerKeys: Record<string, string> | undefined;
+  if (typeof r.provider_keys === 'object' && r.provider_keys !== null) {
+    providerKeys = {};
+    for (const [k, v] of Object.entries(r.provider_keys as Record<string, unknown>)) {
+      if (typeof v === 'string') {
+        providerKeys[k] = resolveEnv(v);
+      }
+    }
+  }
+
+  return {
+    enabled: (r.enabled as boolean) ?? false,
+    account_id: resolveEnv((r.account_id as string) ?? ''),
+    gateway_id: (r.gateway_id as string) ?? DEFAULT_CLOUDFLARE_AI.gateway_id,
+    api_token: resolveEnv((r.api_token as string) ?? ''),
+    mode,
+    models: Array.isArray(r.models) ? (r.models as string[]) : DEFAULT_CLOUDFLARE_AI.models,
+    rpm: (r.rpm as number) ?? undefined,
+    rpd: (r.rpd as number) ?? undefined,
+    provider_keys: providerKeys,
+  };
+}
+
 function mergeRouting(raw: unknown): RoutingConfig {
   if (typeof raw !== 'object' || raw === null) return { ...DEFAULT_ROUTING };
   const r = raw as Record<string, unknown>;
@@ -397,6 +459,7 @@ function mergeConfig(raw: Record<string, unknown>): CorvynConfig {
       opencode_go: mergeOpenCodeGo(rawProviders.opencode_go),
       opencode_zen: mergeOpenCodeZen(rawProviders.opencode_zen),
       ollama: mergeOllama(rawProviders.ollama),
+      cloudflare_ai: mergeCloudflareAI(rawProviders.cloudflare_ai),
     },
     routing: mergeRouting(rawRouting),
   };
@@ -421,6 +484,7 @@ export function getEnabledProviders(config: CorvynConfig): string[] {
   if (providers.opencode_go.enabled && providers.opencode_go.api_key !== '') enabled.push('opencode-go');
   if (providers.opencode_zen.enabled && providers.opencode_zen.api_key !== '') enabled.push('opencode-zen');
   if (providers.ollama.enabled) enabled.push('ollama');
+  if (providers.cloudflare_ai.enabled && providers.cloudflare_ai.api_token !== '' && providers.cloudflare_ai.account_id !== '') enabled.push('cloudflare-ai');
 
   return enabled;
 }

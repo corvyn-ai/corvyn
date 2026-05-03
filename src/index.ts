@@ -171,6 +171,33 @@ async function checkAllProviders(config: CorvynConfig): Promise<CheckedProvider[
     results.push({ name: 'ollama', tier: 'local', status: 'missing', label: 'disabled' });
   }
 
+  // Cloudflare AI Gateway
+  const cf = config.providers.cloudflare_ai;
+  if (cf.enabled && cf.api_token !== '' && cf.account_id !== '') {
+    const cfUrl = `https://gateway.ai.cloudflare.com/v1/${cf.account_id}/${cf.gateway_id}`;
+    let ok = false;
+    try {
+      const res = await fetch(`${cfUrl}/compat/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'cf-aig-authorization': `Bearer ${cf.api_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model: 'workers-ai/@cf/meta/llama-3.2-1b-instruct', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 }),
+        signal: AbortSignal.timeout(5000),
+      });
+      ok = res.ok || res.status === 401 || res.status === 400 || res.status === 404;
+    } catch {}
+    results.push({
+      name: 'cloudflare-ai',
+      tier: 'paid',
+      status: ok ? 'working' : 'warning',
+      label: `${cf.models.length} models via CF Gateway`,
+    });
+  } else {
+    results.push({ name: 'cloudflare-ai', tier: 'paid', status: 'missing', label: 'not configured' });
+  }
+
   return results;
 }
 
@@ -315,6 +342,30 @@ function buildBanner(
   }
   lines.push(`+${border}+`);
 
+  // CLOUDFLARE AI GATEWAY
+  const cfConfig = config.providers.cloudflare_ai;
+  const cfEnabled = cfConfig.enabled && cfConfig.api_token !== '' && cfConfig.account_id !== '';
+  const cfChecked = checked.find((p) => p.name === 'cloudflare-ai');
+  lines.push(`|${visualPadEnd('  CLOUDFLARE AI GATEWAY', W)}|`);
+  if (cfEnabled && cfChecked) {
+    const statusIcon = icon(cfChecked.status);
+    const modeLabel = cfConfig.mode === 'passthrough' ? 'passthrough' : cfConfig.mode === 'byok' ? 'BYOK' : 'unified billing';
+    const cfRow = `  Gateway    ${statusIcon}  ${cfConfig.gateway_id} (${modeLabel})`;
+    lines.push(`|${visualPadEnd(cfRow, W)}|`);
+    const modelsRow = `  Models     ${statusIcon}  ${cfConfig.models.length} models configured`;
+    lines.push(`|${visualPadEnd(modelsRow, W)}|`);
+    for (const m of cfConfig.models.slice(0, 3)) {
+      lines.push(`|${visualPadEnd(`    \u2192 ${m}`, W)}|`);
+    }
+    if (cfConfig.models.length > 3) {
+      lines.push(`|${visualPadEnd(`    + ${cfConfig.models.length - 3} more`, W)}|`);
+    }
+  } else {
+    const row = `  CF Gateway  ${icon('missing')}  not configured`;
+    lines.push(`|${visualPadEnd(row, W)}|`);
+  }
+  lines.push(`+${border}+`);
+
   // LOCAL
   lines.push(`|${visualPadEnd('  LOCAL', W)}|`);
   const local = checked.filter((p) => p.tier === 'local');
@@ -329,7 +380,7 @@ function buildBanner(
 
   // PAID
   lines.push(`|${visualPadEnd('  PAID (your keys)', W)}|`);
-  const paid = checked.filter((p) => p.tier === 'paid' && p.name !== 'opencode-go' && p.name !== 'opencode-zen');
+  const paid = checked.filter((p) => p.tier === 'paid' && p.name !== 'opencode-go' && p.name !== 'opencode-zen' && p.name !== 'cloudflare-ai');
   for (const p of paid) {
     const row = `  ${displayName(p.name).padEnd(10)} ${icon(p.status)}  ${p.label}`;
     lines.push(`|${visualPadEnd(row, W)}|`);
@@ -522,6 +573,38 @@ models    = [
 # enabled = true
 # host = "http://localhost:11434"
 # models = ["qwen2.5-coder:7b"]
+
+# ── Cloudflare AI Gateway ────────────────────────────────────────────
+# Routes requests through Cloudflare's AI Gateway (unified OpenAI-compatible endpoint)
+# Supports caching, rate limiting, analytics, guardrails, and DLP
+# Models use provider/model format: "openai/gpt-4o", "anthropic/claude-sonnet-4.5"
+#
+# Modes:
+#   "unified"     — CF bills you directly from loaded credits (no provider keys needed anywhere)
+#   "byok"        — Store provider API keys in CF dashboard, CF injects them at runtime
+#   "passthrough"  — You send provider keys via provider_keys table below, CF proxies them through
+
+# [providers.cloudflare_ai]
+# enabled    = true
+# account_id = "$CF_ACCOUNT_ID"
+# gateway_id = "default"
+# api_token  = "$CF_AIG_API_TOKEN"
+# mode       = "unified"          # "unified" | "byok" | "passthrough"
+# rpm        = 100
+# rpd        = 10000
+# models     = [
+#   "openai/gpt-4o",
+#   "anthropic/claude-sonnet-4.5",
+#   "google-ai-studio/gemini-2.5-flash",
+#   "groq/llama-3.3-70b-versatile",
+#   "deepseek/deepseek-chat",
+#   "workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+# ]
+# # Only needed for mode = "passthrough" — maps provider prefix to API key
+# [providers.cloudflare_ai.provider_keys]
+# openai            = "$OPENAI_API_KEY"
+# anthropic         = "$ANTHROPIC_API_KEY"
+# google-ai-studio  = "$GEMINI_API_KEY"
 
 # ── Routing ──────────────────────────────────────────────────────────
 # Priority: free tiers -> opencode-go (subscription) -> paid fallbacks

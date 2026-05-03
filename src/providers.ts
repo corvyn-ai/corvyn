@@ -30,6 +30,7 @@ const BASE_URLS: Record<string, string> = {
   anthropic: 'https://api.anthropic.com/v1',
   'opencode-go': 'https://opencode.ai/zen/go/v1',
   'opencode-zen': 'https://opencode.ai/zen/v1',
+  // cloudflare-ai base URL is dynamic, built from account_id + gateway_id
 };
 
 const DEFAULT_RPM: Record<string, number> = {
@@ -53,6 +54,7 @@ function mapProviderTier(raw: string): ProviderTier {
     case 'kimi':
     case 'opencode-go':
     case 'opencode-zen':
+    case 'cloudflare-ai':
       return 'paid';
     case 'ollama':
       return 'local';
@@ -206,6 +208,34 @@ export function getAvailableProviders(config: CorvynConfig): Provider[] {
     }
   }
 
+  // Cloudflare AI Gateway — unified OpenAI-compatible endpoint
+  if (p.cloudflare_ai.enabled && p.cloudflare_ai.api_token !== '' && p.cloudflare_ai.account_id !== '') {
+    const cfBaseUrl = `https://gateway.ai.cloudflare.com/v1/${p.cloudflare_ai.account_id}/${p.cloudflare_ai.gateway_id}/compat`;
+    for (const model of p.cloudflare_ai.models) {
+      const hdrs: Record<string, string> = {
+        'cf-aig-authorization': `Bearer ${p.cloudflare_ai.api_token}`,
+      };
+
+      // passthrough mode: resolve provider key from model prefix
+      let passthroughKey: string | undefined;
+      if (p.cloudflare_ai.mode === 'passthrough' && p.cloudflare_ai.provider_keys) {
+        const providerPrefix = model.split('/')[0] ?? '';
+        passthroughKey = p.cloudflare_ai.provider_keys[providerPrefix];
+      }
+
+      providers.push({
+        name: 'cloudflare-ai',
+        tier: 'paid',
+        baseUrl: cfBaseUrl,
+        apiKey: passthroughKey,
+        modelId: model,
+        rpm: p.cloudflare_ai.rpm,
+        rpd: p.cloudflare_ai.rpd,
+        headers: hdrs,
+      });
+    }
+  }
+
   return providers;
 }
 
@@ -336,6 +366,36 @@ function resolveProvider(
     }));
   }
 
+  if (providerName === 'cloudflare-ai') {
+    const cf = config.providers.cloudflare_ai;
+    if (!cf.enabled || cf.api_token === '' || cf.account_id === '' || cf.models.length === 0) {
+      return [];
+    }
+    const cfBaseUrl = `https://gateway.ai.cloudflare.com/v1/${cf.account_id}/${cf.gateway_id}/compat`;
+    return cf.models.map((modelId) => {
+      const hdrs: Record<string, string> = {
+        'cf-aig-authorization': `Bearer ${cf.api_token}`,
+      };
+
+      let passthroughKey: string | undefined;
+      if (cf.mode === 'passthrough' && cf.provider_keys) {
+        const providerPrefix = modelId.split('/')[0] ?? '';
+        passthroughKey = cf.provider_keys[providerPrefix];
+      }
+
+      return {
+        name: 'cloudflare-ai',
+        tier: 'paid' as ProviderTier,
+        baseUrl: cfBaseUrl,
+        apiKey: passthroughKey,
+        modelId,
+        rpm: cf.rpm,
+        rpd: cf.rpd,
+        headers: hdrs,
+      };
+    });
+  }
+
   const provider = availableMap.get(providerName);
   return provider ? [provider] : [];
 }
@@ -390,11 +450,47 @@ const PROVIDER_COSTS: Record<string, { input: number; output: number }> = {
   kimi: { input: 0.60, output: 3.00 },
 };
 
+const CF_MODEL_COSTS: Record<string, { input: number; output: number }> = {
+  '@cf/moonshotai/kimi-k2.6': { input: 0.95, output: 4.00 },
+  '@cf/moonshotai/kimi-k2.5': { input: 0.95, output: 4.00 },
+  '@cf/openai/gpt-oss-120b': { input: 0.35, output: 0.75 },
+  '@cf/openai/gpt-oss-20b': { input: 0.20, output: 0.30 },
+  '@cf/nvidia/nemotron-3-120b-a12b': { input: 0.50, output: 1.50 },
+  '@cf/qwen/qwen2.5-coder-32b-instruct': { input: 0.66, output: 1.00 },
+  '@cf/meta/llama-3.3-70b-instruct-fp8-fast': { input: 0, output: 0 },
+  '@cf/meta/llama-3.2-1b-instruct': { input: 0, output: 0 },
+  '@cf/meta/llama-3.1-8b-instruct': { input: 0, output: 0 },
+  '@cf/qwen/qwq-32b': { input: 0.66, output: 1.00 },
+  '@cf/google/gemma-3-12b-it': { input: 0, output: 0 },
+  '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b': { input: 0.66, output: 1.00 },
+  '@cf/mistralai/mistral-small-3.1-24b-instruct': { input: 0.30, output: 0.30 },
+  'openai/gpt-4o': { input: 2.50, output: 10.00 },
+  'openai/gpt-4o-mini': { input: 0.15, output: 0.60 },
+  'anthropic/claude-sonnet-4.5': { input: 3.00, output: 15.00 },
+  'anthropic/claude-sonnet-4': { input: 3.00, output: 15.00 },
+  'anthropic/claude-haiku-4.5': { input: 0.80, output: 4.00 },
+  'google-ai-studio/gemini-2.5-flash': { input: 0.15, output: 0.60 },
+  'google-ai-studio/gemini-2.5-pro': { input: 1.25, output: 10.00 },
+  'groq/llama-3.3-70b-versatile': { input: 0.59, output: 0.79 },
+  'deepseek/deepseek-chat': { input: 0.27, output: 1.10 },
+  'cerebras/llama-3.3-70b': { input: 0.60, output: 0.60 },
+};
+
 export function calculateCost(
   providerName: string,
   inputTokens: number,
-  outputTokens: number
+  outputTokens: number,
+  modelId?: string,
 ): number {
+  if (providerName === 'cloudflare-ai' && modelId) {
+    const modelKey = modelId.replace(/^workers-ai\//, '');
+    const costs = CF_MODEL_COSTS[modelKey] ?? CF_MODEL_COSTS[modelId] ?? { input: 0.50, output: 3.00 };
+    return (
+      (inputTokens / 1_000_000) * costs.input +
+      (outputTokens / 1_000_000) * costs.output
+    );
+  }
+
   const key = providerName.toLowerCase()
     .replace('-free', '')
     .replace('-local', '')
