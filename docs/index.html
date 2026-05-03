@@ -962,7 +962,7 @@
     <!-- PROVIDERS -->
     <section class="providers-section" id="providers">
         <div class="container">
-            <h2 class="section-title fade-in-up" style="font-family: 'Inter', sans-serif;">Every Free Model. One Proxy.</h2>
+            <h2 class="section-title fade-in-up" style="font-family: 'Inter', sans-serif;">Every Free Model. Every Gateway. One Proxy.</h2>
             <div class="providers-grid">
                 <!-- FREE -->
                 <div class="provider-card">
@@ -1022,11 +1022,58 @@
                     <div class="provider-limit">K2.6 · Agentic</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
+                <!-- GATEWAY -->
+                <div class="provider-card" style="border-color: #f48120; background: linear-gradient(135deg, #fff8f0, #ffffff);">
+                    <div class="provider-name" style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" fill="#f48120"/><path d="M30 50h40M50 30v40" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>
+                        Cloudflare AI
+                    </div>
+                    <div class="provider-limit">Gateway · 20+ providers</div>
+                    <span class="provider-badge" style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80;">GATEWAY</span>
+                </div>
             </div>
         </div>
     </section>
 
 
+
+    <!-- CLOUDFLARE AI GATEWAY -->
+    <section style="padding: 80px 0; background: linear-gradient(180deg, #fff8f0 0%, #ffffff 100%); border-top: 1px solid #ffe0b2; border-bottom: 1px solid var(--border);">
+        <div class="container">
+            <h2 class="section-title fade-in-up" style="font-family: 'Inter', sans-serif;">Cloudflare AI Gateway Built In</h2>
+            <p style="text-align: center; color: var(--text-muted); max-width: 600px; margin: -40px auto 48px; font-size: 1.05rem;">Route through Cloudflare's edge network. Get caching, analytics, rate limiting, guardrails, and DLP — with zero extra code.</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 960px; margin: 0 auto;">
+                <div class="oss-card" style="text-align: center;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 4px;">3 Modes</h3>
+                    <p>Unified Billing · BYOK · Passthrough</p>
+                </div>
+                <div class="oss-card" style="text-align: center;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 4px;">20+</h3>
+                    <p>Upstream providers via one endpoint</p>
+                </div>
+                <div class="oss-card" style="text-align: center;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 4px;">Edge Cache</h3>
+                    <p>Identical requests served from CF cache</p>
+                </div>
+                <div class="oss-card" style="text-align: center;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 4px;">Per-Model</h3>
+                    <p>Accurate cost tracking per model</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 40px;">
+                <div style="display: inline-block; background: var(--terminal-bg); border-radius: 8px; padding: 16px 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #a0a0a0; text-align: left; border: 1px solid var(--terminal-border);">
+                    <span style="color: #888;"># corvyn.config.toml</span><br>
+                    <span style="color: #fff;">[providers.cloudflare_ai]</span><br>
+                    enabled &nbsp;&nbsp;&nbsp;= <span style="color: #27c93f;">true</span><br>
+                    account_id = <span style="color: #ffbd2e;">"$CF_ACCOUNT_ID"</span><br>
+                    gateway_id = <span style="color: #ffbd2e;">"default"</span><br>
+                    mode &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span style="color: #ffbd2e;">"unified"</span><br>
+                    api_token &nbsp;= <span style="color: #ffbd2e;">"$CF_AIG_API_TOKEN"</span><br>
+                    models &nbsp;&nbsp;&nbsp;&nbsp;= [<span style="color: #ffbd2e;">"workers-ai/@cf/moonshotai/kimi-k2.6"</span>, ...]
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- CURRENCY SHOWCASE -->
     <section class="currency-showcase">
@@ -1171,6 +1218,14 @@
 '+----------------------------------------------+',
 '|  OPENCODE ZEN (pay-as-you-go)                |',
 '|  OpenCode Zen  ✗  not configured            |',
+'+----------------------------------------------+',
+'|  CLOUDFLARE AI GATEWAY                       |',
+'|  Gateway    ✓  default (unified billing)    |',
+'|  Models     ✓  7 models configured          |',
+'|    → workers-ai/@cf/moonshotai/kimi-k2.6    |',
+'|    → workers-ai/@cf/openai/gpt-oss-120b     |',
+'|    → workers-ai/@cf/nvidia/nemotron-3-120b.. |',
+'|    + 4 more                                  |',
 '+----------------------------------------------+',
 '|  LOCAL                                       |',
 '|  Ollama     ✗  disabled                     |',
