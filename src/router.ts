@@ -218,83 +218,97 @@ function createSSEProxy(upstream: ReadableStream<Uint8Array>, ctx: StreamCtx): R
   const dec = new TextDecoder();
   let buf = "";
 
-  return new ReadableStream({
-    async start(controller) {
-      const reader = upstream.getReader();
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+  let controllerRef!: ReadableStreamDefaultController<Uint8Array>;
 
-          buf += dec.decode(value, { stream: true });
-          const lines = buf.split("\n");
-          buf = lines.pop() ?? "";
-
-          for (const line of lines) {
-            const t = line.trim();
-            if (t === "" || t.startsWith(":")) continue;
-            if (!t.startsWith("data: ")) continue;
-            const payload = t.slice(6).trim();
-
-            if (payload === "[DONE]") {
-              controller.enqueue(enc.encode("data: [DONE]\n\n"));
-              reader.releaseLock();
-              controller.close();
-              return;
-            }
-
-            try {
-              const chunk = JSON.parse(payload) as Record<string, unknown>;
-
-              // Clean non-standard fields
-              const choices = chunk.choices as Array<Record<string, unknown>> | undefined;
-              if (choices) {
-                for (const c of choices) {
-                  const d = c.delta as Record<string, unknown> | undefined;
-                  if (d) { delete d.reasoning_details; }
-                  delete c.native_finish_reason;
-                }
-              }
-              delete chunk.provider;
-
-              // Capture usage from final chunk and write to DB
-              const u = chunk.usage as Record<string, unknown> | undefined;
-              if (u && typeof u.prompt_tokens === "number") {
-                const tokIn = (u.prompt_tokens as number) ?? 0;
-                const tokOut = (u.completion_tokens as number) ?? 0;
-                const orCost = (u.cost as number) ?? 0;
-                const costUsd = orCost > 0 ? orCost : calculateCost(ctx.provider.name, tokIn, tokOut, ctx.provider.modelId);
-                const savedUsd = calculateSavings(costUsd, tokIn, tokOut);
-                const latency = Date.now() - ctx.startTime;
-                try {
-                  recordRequest(ctx.db, {
-                    timestamp: new Date().toISOString(),
-                    taskCategory: ctx.taskCategory,
-                    providerUsed: ctx.provider.name,
-                    modelUsed: ctx.provider.modelId,
-                    providerTier: ctx.provider.tier,
-                    tokensInput: tokIn, tokensOutput: tokOut,
-                    costUsd, costLocal: costUsd * ctx.currency.rate,
-                    savedUsd, currencyCode: ctx.currency.code,
-                    latencyMs: latency,
-                  });
-                } catch {}
-                logUsageSummary(ctx, tokIn, tokOut, costUsd, savedUsd, latency);
-              }
-
-              controller.enqueue(enc.encode(`data: ${JSON.stringify(chunk)}\n\n`));
-            } catch {}
-          }
-        }
-      } catch (err) {
-        console.error(`[CORVYN] Stream error: ${err instanceof Error ? err.message : String(err)}`);
-      } finally {
-        reader.releaseLock();
-      }
-      controller.enqueue(enc.encode("data: [DONE]\n\n"));
-      controller.close();
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controllerRef = controller;
     },
   });
+
+  (async () => {
+    const reader = upstream.getReader();
+    let closed = false;
+
+    const close = () => {
+      if (closed) return;
+      closed = true;
+      try { controllerRef.enqueue(enc.encode("data: [DONE]\n\n")); } catch {}
+      try { controllerRef.close(); } catch {}
+    };
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buf += dec.decode(value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop() ?? "";
+
+        for (const line of lines) {
+          const t = line.trim();
+          if (t === "" || t.startsWith(":")) continue;
+          if (!t.startsWith("data: ")) continue;
+          const payload = t.slice(6).trim();
+
+          if (payload === "[DONE]") {
+            close();
+            return;
+          }
+
+          try {
+            const chunk = JSON.parse(payload) as Record<string, unknown>;
+
+            const choices = chunk.choices as Array<Record<string, unknown>> | undefined;
+            if (choices) {
+              for (const c of choices) {
+                const d = c.delta as Record<string, unknown> | undefined;
+                if (d) { delete d.reasoning_details; }
+                delete c.native_finish_reason;
+              }
+            }
+            delete chunk.provider;
+
+            const u = chunk.usage as Record<string, unknown> | undefined;
+            if (u && typeof u.prompt_tokens === "number") {
+              const tokIn = (u.prompt_tokens as number) ?? 0;
+              const tokOut = (u.completion_tokens as number) ?? 0;
+              const orCost = (u.cost as number) ?? 0;
+              const costUsd = orCost > 0 ? orCost : calculateCost(ctx.provider.name, tokIn, tokOut, ctx.provider.modelId);
+              const savedUsd = calculateSavings(costUsd, tokIn, tokOut);
+              const latency = Date.now() - ctx.startTime;
+              try {
+                recordRequest(ctx.db, {
+                  timestamp: new Date().toISOString(),
+                  taskCategory: ctx.taskCategory,
+                  providerUsed: ctx.provider.name,
+                  modelUsed: ctx.provider.modelId,
+                  providerTier: ctx.provider.tier,
+                  tokensInput: tokIn, tokensOutput: tokOut,
+                  costUsd, costLocal: costUsd * ctx.currency.rate,
+                  savedUsd, currencyCode: ctx.currency.code,
+                  latencyMs: latency,
+                });
+              } catch {}
+              logUsageSummary(ctx, tokIn, tokOut, costUsd, savedUsd, latency);
+            }
+
+            if (!closed) {
+              controllerRef.enqueue(enc.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+            }
+          } catch {}
+        }
+      }
+    } catch (err) {
+      console.error(`[CORVYN] Stream error: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      try { reader.releaseLock(); } catch {}
+    }
+    close();
+  })();
+
+  return stream;
 }
 
 // ── Try a single provider ───────────────────────────────────────────
@@ -323,19 +337,41 @@ async function tryProvider(
     headers.Authorization = `Bearer ${provider.apiKey}`;
   }
 
-  // Strip non-standard fields from messages that some providers reject
+  // Strip non-standard fields from messages that some providers reject.
+  // Kimi models require reasoning_content for multi-turn thinking — preserve it.
+  const isKimiModel = provider.modelId.startsWith("kimi-");
   const cleanedMessages = (parsed.messages as Array<Record<string, unknown>>).map((msg) => {
     if (typeof msg !== "object" || msg === null) return msg;
+    if (isKimiModel) {
+      const { reasoning, ...rest } = msg;
+      return rest;
+    }
     const { reasoning_content, reasoning, ...rest } = msg;
     return rest;
   });
+
+  // Kimi models default strict:true for tool schemas (MFJS spec).
+  // Tool schemas from coding agents often have empty {} params or missing
+  // "required" arrays which fail strict validation. Set strict:false to
+  // let Kimi accept any valid JSON object for tool args.
+  const tools = parsed.tools
+    ? isKimiModel
+      ? (parsed.tools as Array<Record<string, unknown>>).map((tool) => {
+          const fn = tool.function as Record<string, unknown> | undefined;
+          if (fn && tool.type === "function") {
+            return { ...tool, function: { ...fn, strict: false } };
+          }
+          return tool;
+        })
+      : parsed.tools
+    : undefined;
 
   const body: Record<string, unknown> = {
     model: provider.modelId,
     messages: cleanedMessages,
     stream: true,
   };
-  if (parsed.tools) body.tools = parsed.tools;
+  if (tools) body.tools = tools;
   if (parsed.temperature !== undefined) body.temperature = parsed.temperature;
   if (parsed.maxTokens !== undefined) body.max_tokens = parsed.maxTokens;
 
@@ -350,7 +386,8 @@ async function tryProvider(
 
   if (!upstream.ok) {
     const errText = await upstream.text().catch(() => "");
-    throw new Error(`${provider.name} ${upstream.status}: ${errText.substring(0, 200)}`);
+    console.error(`[CORVYN] ✗ ${provider.name} (${provider.modelId}) HTTP ${upstream.status} full error:\n${errText}`);
+    throw new Error(`${provider.name} ${upstream.status}: ${errText}`);
   }
   if (!upstream.body) throw new Error(`${provider.name}: no body`);
 
@@ -625,7 +662,7 @@ export async function routeRequest(
 function logErr(p: Provider, e: unknown): void {
   const msg = e instanceof Error ? e.message : String(e);
   const rl = msg.includes("429") || msg.toLowerCase().includes("rate");
-  console.error(`[CORVYN] ✗ ${p.name} (${p.modelId}): ${msg.substring(0, 120)}${rl ? " [rate-limited]" : ""}`);
+  console.error(`[CORVYN] ✗ ${p.name} (${p.modelId}): ${msg}${rl ? " [rate-limited]" : ""}`);
 }
 
 function err503(config: CorvynConfig): Response {

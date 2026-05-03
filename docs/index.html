@@ -8,51 +8,225 @@
     <meta property="og:title" content="CORVYN — AI Cost Router for Every Developer">
     <meta property="og:description" content="Route every request to the best free model. See your bill in your currency — ₹, ₦, R$, whatever is yours.">
     <meta property="og:image" content="https://corvyn.cc/og-image.png">
-    <meta name="theme-color" content="#0a0a0a">
+    <meta name="theme-color" content="#fafafa">
     <meta name="canonical" content="https://corvyn.cc">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg: #ffffff;
-            --surface: #fafafa;
-            --border: #eaeaea;
-            --border-hover: #cccccc;
-            --text-primary: #000000;
-            --text-muted: #666666;
-            --text-dim: #999999;
-            --accent: #000000;
-            --accent-dim: #f5f5f5;
-            --terminal-bg: #000000;
-            --terminal-text: #ffffff;
-            --terminal-border: #333333;
+            --bg: #fafafa;
+            --bg-elevated: #ffffff;
+            --surface: #f5f5f5;
+            --surface-hover: #eeeeee;
+            --border: #e5e5e5;
+            --border-strong: #d4d4d4;
+            --text-primary: #171717;
+            --text-secondary: #525252;
+            --text-tertiary: #737373;
+            --text-inverse: #ffffff;
+            --accent: #171717;
+            --accent-hover: #404040;
+            --accent-muted: #f0f0f0;
+            --success: #16a34a;
+            --warning: #ca8a04;
+            --terminal-bg: #0a0a0a;
+            --terminal-text: #e5e5e5;
+            --terminal-border: #262626;
+            --radius: 8px;
+            --radius-sm: 6px;
+            --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+            --shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        html { scroll-behavior: smooth; }
+        
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg);
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         h1, h2, h3, h4, h5, h6 {
-            font-family: 'Inter', sans-serif;
             font-weight: 600;
             letter-spacing: -0.02em;
+            line-height: 1.2;
         }
 
         code, pre, .mono {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
         }
 
-        a { color: inherit; text-decoration: none; transition: all 0.2s; }
+        a { color: inherit; text-decoration: none; }
         
-        .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 32px; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 0 20px; }
+        }
+
+        /* FLOATING ORBS */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0,0,0,0.08) 0%, transparent 70%);
+            top: 10%;
+            left: -100px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0,0,0,0.06) 0%, transparent 70%);
+            top: 40%;
+            right: -50px;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(0,0,0,0.05) 0%, transparent 70%);
+            bottom: 20%;
+            left: 30%;
+            animation: float 12s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        /* NOISE OVERLAY */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            opacity: 0.025;
+            pointer-events: none;
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* SCROLL PROGRESS */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #171717, #525252);
+            z-index: 1001;
+            transition: width 0.1s;
+        }
+
+        /* SPOTLIGHT EFFECT */
+        .spotlight-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spotlight-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0,0,0,0.06), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .spotlight-card:hover::after {
+            opacity: 1;
+        }
+
+        /* MAGNETIC BUTTON */
+        .magnetic-btn {
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* MARQUEE */
+        .marquee-section {
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 32px 0;
+            overflow: hidden;
+        }
+
+        .marquee-track {
+            display: flex;
+            gap: 64px;
+            animation: marquee 30s linear infinite;
+            width: max-content;
+        }
+
+        .marquee-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-tertiary);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .marquee-item i {
+            font-size: 1.25rem;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* SHIMMER LOADING */
+        .shimmer {
+            background: linear-gradient(90deg, var(--surface) 25%, var(--bg-elevated) 50%, var(--surface) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* 3D TILT */
+        .tilt-card {
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 40%, transparent 100%);
+            pointer-events: none;
+        }
 
         /* NAV */
         .navbar {
@@ -60,57 +234,42 @@
             top: 0;
             left: 0;
             right: 0;
-            background: #ffffff;
+            background: rgba(250,250,250,0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             z-index: 1000;
-            padding: 16px 0;
+            padding: 0;
         }
 
         .nav-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 64px;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-family: 'Inter', sans-serif;
             font-weight: 700;
-            font-size: 1.5rem;
-            color: #000;
-            text-decoration: none;
-            position: relative;
-            display: inline-block;
-            background: var(--bg);
-            padding: 4px 8px;
-            box-sizing: border-box;
-        }
-
-        .logo::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid #000;
-            border-radius: 4px;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .logo-text {
-            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text-primary);
             letter-spacing: -0.04em;
-            position: relative;
-            z-index: 1;
         }
 
-        .footer-logo {
-            font-size: 1rem;
-            padding: 2px 6px;
+        .logo-mark {
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-inverse);
+            font-size: 0.75rem;
+            font-weight: 800;
         }
 
         .nav-links {
@@ -120,692 +279,883 @@
         }
 
         .nav-links a {
-            color: #000000;
-            font-size: 0.9rem;
-            opacity: 0.7;
-            font-family: 'Inter', sans-serif;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
         }
 
-        .nav-links a:hover { opacity: 1; }
+        .nav-links a:hover { color: var(--text-primary); }
+
+        .nav-cta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
 
         .btn {
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: var(--radius);
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             cursor: pointer;
             transition: all 0.2s;
             border: 1px solid transparent;
+            font-family: inherit;
         }
 
         .btn-primary {
-            background: #000000;
-            color: #ffffff;
+            background: var(--accent);
+            color: var(--text-inverse);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-primary:hover { background: #333333; }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-primary:hover::before {
+            opacity: 1;
+        }
+
+        .btn-primary:hover { 
+            background: var(--accent-hover); 
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
 
         .btn-secondary {
-            background: transparent;
-            color: #000000;
-            border: 1px solid #000000;
-        }
-
-        .btn-secondary:hover { background: #f5f5f5; }
-
-        .github-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            background: var(--bg-elevated);
             color: var(--text-primary);
-            font-size: 0.85rem;
+            border: 1px solid var(--border-strong);
+            box-shadow: var(--shadow-sm);
         }
 
-        .github-btn:hover { color: var(--accent); }
+        .btn-secondary:hover { border-color: var(--text-primary); background: var(--surface); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 8px 12px;
+        }
+
+        .btn-ghost:hover { color: var(--text-primary); background: var(--surface); }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .nav-cta .btn-secondary { display: none; }
+            .mobile-menu-btn { display: block; }
+        }
 
         /* HERO */
         .hero {
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 80px;
+            padding-top: 64px;
             position: relative;
             overflow: hidden;
             background: var(--bg);
-            border-bottom: 2px solid #000;
         }
 
         .hero-content {
-            max-width: 900px;
-            margin: 0 120px;
-            z-index: 2;
+            max-width: 1100px;
+            text-align: center;
+            padding: 100px 24px 64px;
             position: relative;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #f5f5f5;
-            color: #666;
-            border: 1px solid #eaeaea;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-family: 'Inter', sans-serif;
-            padding: 4px 8px;
-            margin-bottom: 24px;
-            position: relative;
-            display: inline-block;
-            box-sizing: border-box;
-        }
-
-        .badge::before {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
-            bottom: 2px;
-            border: 1px solid #000;
-            border-radius: 2px;
-            pointer-events: none;
-        }
-
-        .hero h1 {
-            font-family: 'Inter', sans-serif;
-            font-size: clamp(4rem, 8vw, 6rem);
-            line-height: 1.05;
-            margin-bottom: 32px;
-            font-weight: 700;
-            color: #000;
-            position: relative;
-            display: inline-block;
-            background: var(--bg);
-            padding-right: 8px;
-            box-sizing: border-box;
-        }
-
-        .hero h1::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid #000;
-            border-radius: 4px;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .hero h1 span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero p {
-            font-size: 1.125rem;
-            color: #000;
-            margin-bottom: 32px;
-            max-width: 520px;
-            position: relative;
-            display: inline-block;
-            background: var(--bg);
-            padding: 4px 8px;
-            box-sizing: border-box;
-        }
-
-        .hero p::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid #000;
-            border-radius: 4px;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 40px;
-            position: relative;
-            display: inline-block;
-            background: var(--bg);
-            padding: 4px 8px;
-            box-sizing: border-box;
-        }
-
-        .hero-actions::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid #000;
-            border-radius: 4px;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .hero-content {
-            max-width: 100%;
-            margin: 0 120px;
             z-index: 2;
         }
 
-        .badge {
+        .hero-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: #fafafa;
-            color: #666;
-            border: 1px solid #eaeaea;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-family: 'Inter', sans-serif;
-            padding: 6px 12px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            padding: 6px 16px;
             margin-bottom: 32px;
+            color: var(--text-secondary);
+            box-shadow: var(--shadow-sm);
+            position: relative;
         }
 
-        .badge-dot {
-            width: 8px;
-            height: 8px;
-            background: #000;
+        .hero-badge::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 100px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .hero-badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
             border-radius: 50%;
-            animation: pulse 1.5s infinite;
+            animation: pulse 2s ease-in-out infinite;
         }
 
         .hero h1 {
-            font-size: clamp(3rem, 8vw, 5rem);
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
             line-height: 1.1;
             margin-bottom: 24px;
             font-weight: 700;
             color: var(--text-primary);
+            letter-spacing: -0.03em;
         }
 
-        .hero h1 span { color: var(--accent); }
+        .hero h1 .accent {
+            background: linear-gradient(135deg, #171717 0%, #525252 50%, #171717 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-        .hero p {
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, #171717 0%, #737373 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
             font-size: 1.125rem;
-            color: var(--text-muted);
-            margin-bottom: 32px;
-            max-width: 520px;
+            color: var(--text-secondary);
+            margin: 0 auto 40px;
+            max-width: 700px;
+            line-height: 1.7;
         }
 
         .hero-actions {
             display: flex;
-            gap: 16px;
-            margin-bottom: 40px;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 64px;
+            flex-wrap: wrap;
+        }
+
+        .hero-actions .btn {
+            padding: 12px 24px;
+            font-size: 0.9375rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-num {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .hero-stat-label {
+            display: block;
+            font-size: 0.8125rem;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+
+        .hero-stat-divider {
+            width: 1px;
+            height: 40px;
+            background: var(--border);
+        }
+
+        @media (max-width: 640px) {
+            .hero-actions { flex-direction: column; align-items: stretch; }
+            .hero-actions .btn { justify-content: center; }
+            .hero-stats { gap: 24px; }
+            .hero-stat-num { font-size: 1.5rem; }
+        }
+
+        /* TERMINAL */
+        .terminal-wrapper {
+            max-width: 1200px;
+            margin: 0 auto 80px;
+            padding: 0 32px;
+            position: relative;
+            z-index: 2;
         }
 
         .terminal {
             background: var(--terminal-bg);
-            border-radius: 12px;
+            border-radius: var(--radius);
             border: 1px solid var(--terminal-border);
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            margin: 64px auto;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .terminal-header {
             padding: 12px 16px;
-            background: #111111;
+            background: #141414;
             border-bottom: 1px solid var(--terminal-border);
             display: flex;
             gap: 8px;
             align-items: center;
         }
 
-        .dot { width: 12px; height: 12px; border-radius: 50%; opacity: 1; }
-        .dot-red { background: #ff5f56; border: 1px solid #e0443e; }
-        .dot-yellow { background: #ffbd2e; border: 1px solid #dea123; }
-        .dot-green { background: #27c93f; border: 1px solid #1aab29; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; transition: all 0.3s ease; }
+        .dot-red { background: #ff5f56; box-shadow: 0 0 6px rgba(255, 95, 86, 0.4); }
+        .dot-yellow { background: #ffbd2e; box-shadow: 0 0 6px rgba(255, 189, 46, 0.4); }
+        .dot-green { background: #27c93f; box-shadow: 0 0 6px rgba(39, 201, 63, 0.4); }
+        
+        .terminal:hover .dot-red { box-shadow: 0 0 10px rgba(255, 95, 86, 0.6); }
+        .terminal:hover .dot-yellow { box-shadow: 0 0 10px rgba(255, 189, 46, 0.6); }
+        .terminal:hover .dot-green { box-shadow: 0 0 10px rgba(39, 201, 63, 0.6); }
+
+        .terminal-title {
+            margin-left: 8px;
+            font-size: 0.75rem;
+            color: #737373;
+            font-family: 'JetBrains Mono', monospace;
+        }
 
         .terminal-body {
-            padding: 24px 16px;
+            padding: 20px 16px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
+            font-size: 0.8125rem;
             color: var(--terminal-text);
-            min-height: 480px;
+            min-height: 420px;
             background: var(--terminal-bg);
             white-space: pre;
             line-height: 1.6;
+            overflow-x: auto;
         }
 
-        .terminal-line.green { color: #ffffff; }
-        .terminal-line.amber { color: #a0a0a0; }
-        .terminal-line.dim { color: #888888; }
+        .terminal-line { color: #a3a3a3; }
+        .terminal-line.green { color: #4ade80; }
+        .terminal-line.amber { color: #fbbf24; }
+        .terminal-line.blue { color: #60a5fa; }
+        .terminal-line.dim { color: #525252; }
+        .terminal-line.header { color: #e5e5e5; font-weight: 600; }
 
-        /* SAVINGS COUNTER */
+        @media (max-width: 768px) {
+            .terminal-body { font-size: 0.6875rem; min-height: 350px; padding: 16px 12px; }
+            .terminal-wrapper { padding: 0 20px; }
+        }
+
+        /* SECTIONS */
+        .section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .section { padding: 64px 0; }
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto 64px;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            font-size: 1.0625rem;
+            line-height: 1.7;
+        }
+
+        /* SAVINGS */
         .savings-section {
-            background: var(--surface);
+            background: var(--bg-elevated);
             border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
-            padding: 64px 0;
-        }
-
-        .savings-amount {
-            font-family: 'Inter', sans-serif;
-            font-size: clamp(3rem, 6vw, 5rem);
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-
-        .savings-sub {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-
-        .currency-switcher {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 32px;
-            flex-wrap: wrap;
-        }
-
-        .currency-btn {
-            padding: 8px 16px;
-            border-radius: 4px;
-            color: var(--text-muted);
-            font-size: 0.875rem;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            cursor: pointer;
-        }
-
-        .currency-btn.active {
-            color: #000;
-            border-color: #000;
-            background: #fafafa;
-        }
-
-        .currency-btn:hover {
-            color: #000;
-            border-color: #000;
         }
 
         .savings-content {
             text-align: center;
         }
 
-        .savings-label {
-            color: var(--text-muted);
-            font-size: 1rem;
+        .savings-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 600;
             margin-bottom: 8px;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .savings-amount {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(3rem, 6vw, 5rem);
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 8px;
+        .savings-label {
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 4px;
         }
 
         .savings-sub {
-            color: var(--text-dim);
+            color: var(--text-tertiary);
             font-size: 0.875rem;
         }
 
         .currency-switcher {
             display: flex;
             justify-content: center;
-            gap: 16px;
+            gap: 8px;
             margin-top: 32px;
+            flex-wrap: wrap;
         }
 
         .currency-btn {
             padding: 8px 16px;
-            border-radius: 4px;
-            color: var(--text-dim);
-            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            color: var(--text-tertiary);
+            font-size: 0.8125rem;
+            font-weight: 500;
             border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
         }
 
         .currency-btn.active {
-            color: var(--accent);
-            border-color: var(--accent);
-            background: var(--accent-dim);
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+            background: var(--surface);
         }
 
         .currency-btn:hover {
-            color: var(--accent);
-            border-color: var(--border-hover);
-        }
-
-        /* HOW IT WORKS */
-        .how-it-works {
-            padding: 80px 0;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: clamp(2rem, 4vw, 3rem);
-            margin-bottom: 64px;
-        }
-
-        .steps-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 48px;
-            position: relative;
-        }
-
-        .steps-container::before {
-            content: '';
-            position: absolute;
-            top: 80px;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, var(--border) 0%, var(--border-hover) 50%, var(--border) 100%);
-            z-index: 0;
-        }
-
-        .step-card {
-            flex: 1;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-            transition: transform 0.3s, border-color 0.3s;
-        }
-
-        .step-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--border-hover);
-        }
-
-        .step-icon {
-            font-size: 3rem;
-            color: var(--accent);
-            margin-bottom: 16px;
-        }
-
-        .step-title {
-            font-size: 1.25rem;
-            margin-bottom: 12px;
             color: var(--text-primary);
+            border-color: var(--border-strong);
         }
 
-        .step-desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* PROVIDERS GRID */
-        .providers-section {
-            padding: 80px 0;
-        }
-
-        .providers-grid {
+        /* BENTO GRID - HOW IT WORKS */
+        .bento-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
         }
 
-        .provider-card {
-            background: var(--surface);
+        .bento-card {
+            background: var(--bg-elevated);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s;
+            border-radius: var(--radius);
+            padding: 32px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .provider-card:hover {
-            border-color: var(--border-hover);
+        .bento-card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-lg);
             transform: translateY(-2px);
         }
 
-        .provider-name {
-            font-family: 'Inter', sans-serif;
-            font-size: 1.25rem;
+        .bento-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+        }
+
+        .bento-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--surface) 0%, var(--bg-elevated) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .bento-card:hover .bento-icon {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .bento-title {
+            font-size: 1.0625rem;
             font-weight: 600;
             margin-bottom: 8px;
             color: var(--text-primary);
         }
 
-        .provider-limit {
-            color: var(--text-muted);
+        .bento-desc {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .bento-grid { grid-template-columns: 1fr; }
+            .bento-card { padding: 24px; }
+        }
+
+        /* PROVIDERS */
+        .providers-section {
+            background: var(--surface);
+        }
+
+        .providers-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .provider-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .provider-card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow);
+        }
+
+        .provider-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            overflow: hidden;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .provider-logo img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        .provider-logo .logo-fallback {
             font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .provider-card:hover .provider-logo {
+            transform: scale(1.1);
+            border-color: var(--border-strong);
+        }
+
+        .provider-name {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .provider-limit {
+            color: var(--text-tertiary);
+            font-size: 0.8125rem;
             margin-bottom: 12px;
         }
 
         .provider-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: 0.6875rem;
             font-family: 'JetBrains Mono', monospace;
             font-weight: 600;
+            letter-spacing: 0.02em;
+            transition: all 0.2s ease;
+        }
+
+        .provider-card:hover .provider-badge {
+            transform: scale(1.05);
         }
 
         .badge-free {
-            background: #f5f5f5;
-            color: #000;
+            background: #dcfce7;
+            color: #166534;
         }
 
         .badge-local {
-            background: #eaeaea;
-            color: #000;
+            background: #e0e7ff;
+            color: #3730a3;
         }
 
         .badge-paid {
-            background: #ffffff;
-            border: 1px solid #eaeaea;
-            color: #666;
-        }
-
-        /* CLASSIFIER STATS */
-        .classifier-section {
-            padding: 80px 0;
-        }
-
-        .classifier-card {
             background: var(--surface);
-            border: 1px solid var(--accent);
-            border-radius: 16px;
-            padding: 48px;
-            text-align: center;
+            border: 1px solid var(--border);
+            color: var(--text-tertiary);
         }
 
-        .classifier-stat {
-            font-family: 'Inter', sans-serif;
-            font-size: 4rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 8px;
+        .badge-gateway {
+            background: #fff7ed;
+            color: #9a3412;
+            border: 1px solid #fed7aa;
         }
 
-        .classifier-label {
-            color: var(--text-primary);
-            font-size: 1.5rem;
-            margin-bottom: 32px;
-            font-family: 'Inter', sans-serif;
+        .provider-card.gateway {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #fff7ed 0%, var(--bg-elevated) 100%);
         }
 
-        .classifier-sub {
-            color: var(--text-muted);
-            max-width: 520px;
-            margin: 0 auto 32px;
+        @media (max-width: 1024px) {
+            .providers-grid { grid-template-columns: repeat(3, 1fr); }
+            .provider-card.gateway { grid-column: span 1; }
         }
 
-        .classifier-table {
-            display: flex;
-            justify-content: center;
+        @media (max-width: 768px) {
+            .providers-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .providers-grid { grid-template-columns: 1fr; }
+        }
+
+        /* CLOUDFLARE SECTION */
+        .cf-section {
+            background: var(--bg-elevated);
+        }
+
+        .cf-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            flex-wrap: wrap;
+            margin: 0 auto 48px;
         }
 
-        .classifier-item {
-            padding: 8px 16px;
+        .cf-card {
             background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 4px;
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .cf-card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow);
+        }
+
+        .cf-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .cf-card p {
+            color: var(--text-secondary);
             font-size: 0.875rem;
+        }
+
+        .cf-code {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--terminal-bg);
+            border-radius: var(--radius);
+            padding: 24px;
             font-family: 'JetBrains Mono', monospace;
-            color: var(--text-muted);
+            font-size: 0.8125rem;
+            color: #a3a3a3;
+            border: 1px solid var(--terminal-border);
+            overflow-x: auto;
+        }
+
+        .cf-code .comment { color: #525252; }
+        .cf-code .section { color: #e5e5e5; }
+        .cf-code .key { color: #93c5fd; }
+        .cf-code .string { color: #86efac; }
+        .cf-code .bool { color: #fca5a5; }
+
+        @media (max-width: 768px) {
+            .cf-grid { grid-template-columns: repeat(2, 1fr); }
+            .cf-code { font-size: 0.6875rem; padding: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .cf-grid { grid-template-columns: 1fr; }
         }
 
         /* CURRENCY SHOWCASE */
-        .currency-showcase {
-            padding: 80px 0;
+        .currency-section {
             background: var(--bg);
         }
 
         .currency-display {
             text-align: center;
-            padding: 64px 0;
         }
 
         .currency-main {
-            font-family: 'Inter', sans-serif;
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .currency-sub {
-            color: var(--text-muted);
-            font-family: 'Inter', sans-serif;
+            color: var(--text-secondary);
+            font-size: 1rem;
         }
 
-        .currency-cycle {
-            animation: fade 2s ease-in-out infinite;
-        }
-
-        /* INSTALL SECTION */
+        /* INSTALL */
         .install-section {
-            padding: 80px 0;
-        }
-
-        .install-steps {
-            display: grid;
-            gap: 24px;
-        }
-
-        .install-step {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
         }
 
-        .step-header {
-            background: var(--bg);
-            padding: 12px 16px;
+        .install-grid {
+            display: grid;
+            gap: 16px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .install-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .install-card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow);
+        }
+
+        .install-header {
+            padding: 14px 20px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--bg);
         }
 
-        .step-title {
+        .install-step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            color: var(--text-inverse);
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .install-title {
             font-size: 0.875rem;
+            font-weight: 600;
             color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
         }
 
         .copy-btn {
             background: transparent;
             border: none;
-            color: var(--text-muted);
+            color: var(--text-tertiary);
             cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .copy-btn:hover { color: var(--text-primary); background: var(--border); }
+        .copy-btn:hover { 
+            color: var(--text-primary); 
+            background: var(--surface); 
+        }
 
-        .step-code {
-            padding: 16px;
+        .install-code {
+            padding: 20px;
             overflow-x: auto;
-            background: var(--bg);
+            background: var(--bg-elevated);
         }
 
-        .step-code pre {
+        .install-code pre {
             margin: 0;
             background: transparent;
         }
 
-        .step-code code {
+        .install-code code {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
+            font-size: 0.8125rem;
             color: var(--text-primary);
+            line-height: 1.6;
         }
 
         /* OPEN SOURCE */
-        .opensource-section {
-            padding: 80px 0;
-            text-align: center;
+        .oss-section {
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--border);
         }
 
         .oss-content {
-            max-width: 640px;
+            max-width: 900px;
             margin: 0 auto;
+            text-align: center;
         }
 
         .oss-btn {
             display: inline-flex;
             align-items: center;
             gap: 12px;
-            padding: 16px 32px;
-            background: var(--surface);
+            padding: 16px 28px;
+            background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1.125rem;
-            margin-bottom: 32px;
-            transition: all 0.3s;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            transition: all 0.2s;
             color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
+            box-shadow: var(--shadow-sm);
         }
 
         .oss-btn:hover {
-            border-color: var(--accent);
-            transform: scale(1.02);
-            color: var(--accent);
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow);
+            transform: translateY(-1px);
         }
 
         .oss-desc {
-            color: var(--text-muted);
+            color: var(--text-secondary);
             margin-bottom: 48px;
-            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
         }
 
-        .oss-cards {
+        .oss-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
         }
 
         .oss-card {
-            background: var(--surface);
+            background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            transition: all 0.2s;
         }
 
-        .oss-card h3 { font-size: 1rem; margin-bottom: 8px; color: var(--text-primary); font-family: 'Inter', sans-serif; }
-        .oss-card p { color: var(--text-muted); font-size: 0.875rem; font-family: 'Inter', sans-serif; }
+        .oss-card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow);
+        }
+
+        .oss-card h3 { 
+            font-size: 0.9375rem; 
+            margin-bottom: 6px; 
+            color: var(--text-primary); 
+            font-weight: 600;
+        }
+        
+        .oss-card p { 
+            color: var(--text-tertiary); 
+            font-size: 0.875rem; 
+        }
+
+        @media (max-width: 640px) {
+            .oss-grid { grid-template-columns: 1fr; }
+        }
 
         /* FOOTER */
         .footer {
             border-top: 1px solid var(--border);
             padding: 48px 0;
-            margin-top: 80px;
+            background: var(--bg);
         }
 
         .footer-content {
@@ -822,14 +1172,46 @@
             gap: 12px;
         }
 
-        .footer-logo { color: var(--accent); font-weight: 700; }
-        .footer-built { color: var(--text-muted); font-size: 0.875rem; font-family: 'Inter', sans-serif; }
+        .footer-built { 
+            color: var(--text-tertiary); 
+            font-size: 0.8125rem; 
+        }
 
-        .footer-links { display: flex; gap: 32px; }
-        .footer-links a { color: var(--text-muted); font-size: 0.875rem; font-family: 'Inter', sans-serif; }
-        .footer-links a:hover { color: var(--accent); }
+        .footer-links { 
+            display: flex; 
+            gap: 24px; 
+        }
+        
+        .footer-links a { 
+            color: var(--text-tertiary); 
+            font-size: 0.8125rem; 
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .footer-links a:hover { 
+            color: var(--text-primary); 
+        }
 
-        .footer-right { color: var(--text-muted); font-size: 0.875rem; text-align: right; font-family: 'Inter', sans-serif; }
+        .footer-right { 
+            color: var(--text-tertiary); 
+            font-size: 0.8125rem; 
+            text-align: right; 
+        }
+
+        @media (max-width: 768px) {
+            .footer-content { 
+                flex-direction: column; 
+                text-align: center; 
+            }
+            .footer-links { 
+                flex-direction: row; 
+                gap: 20px; 
+            }
+            .footer-right { 
+                text-align: center; 
+            }
+        }
 
         /* ANIMATIONS */
         @keyframes pulse {
@@ -838,93 +1220,172 @@
         }
 
         @keyframes fade {
-            0%, 100% { opacity: 0; }
-            20%, 80% { opacity: 1; }
+            0%, 100% { opacity: 0; transform: translateY(4px); }
+            20%, 80% { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
-        .fade-in-up-delay { animation: fadeInUp 0.6s ease-out 0.2s forwards; }
-        .fade-in-up-later { animation: fadeInUp 0.6s ease-out 0.4s forwards; }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            
-            .steps-container { flex-direction: column; }
-            .steps-container::before { display: none; }
-            
-            .footer-content { flex-direction: column; text-align: center; }
-            .footer-links { flex-direction: column; gap: 16px; }
-            .footer-right { text-align: center; }
-            
-            .hero-content { margin: 0 24px; }
+        .animate-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
+
+        .animate-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+
+        /* MOBILE MENU */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: rgba(250,250,250,0.98);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            z-index: 999;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .mobile-nav.open { display: flex; }
+
+        .mobile-nav a {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .mobile-nav a:hover {
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
     </style>
 </head>
 <body>
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="noise-overlay"></div>
+    
     <!-- NAV -->
     <nav class="navbar">
         <div class="container nav-content">
             <a href="#" class="logo">
-                <span class="logo-text">CORVYN</span>
+                <div class="logo-mark">C</div>
+                <span>CORVYN</span>
             </a>
             <div class="nav-links">
-                <a href="#how-it-works" style="font-family: 'Inter', sans-serif;">How it Works</a>
-                <a href="#providers" style="font-family: 'Inter', sans-serif;">Providers</a>
-                <a href="#install" style="font-family: 'Inter', sans-serif;">Install</a>
+                <a href="#how-it-works">How it Works</a>
+                <a href="#providers">Providers</a>
+                <a href="#install">Install</a>
                 <a href="https://github.com/corvyn-ai/corvyn" target="_blank">GitHub</a>
             </div>
-            <a href="https://github.com/corvyn-ai/corvyn" target="_blank" class="btn btn-primary" style="font-family: 'Inter', sans-serif;">
-                <i class="fab fa-github"></i> Get Started
-            </a>
+            <div class="nav-cta">
+                <a href="https://github.com/corvyn-ai/corvyn" target="_blank" class="btn btn-secondary">
+                    <i class="fab fa-github"></i> Star
+                </a>
+                <a href="#install" class="btn btn-primary magnetic-btn">Get Started</a>
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
         </div>
     </nav>
+    
+    <div class="mobile-nav" id="mobileNav">
+        <a href="#how-it-works" onclick="toggleMobileMenu()">How it Works</a>
+        <a href="#providers" onclick="toggleMobileMenu()">Providers</a>
+        <a href="#install" onclick="toggleMobileMenu()">Install</a>
+        <a href="https://github.com/corvyn-ai/corvyn" target="_blank">GitHub</a>
+    </div>
 
     <!-- HERO -->
     <section class="hero">
-        <div class="container hero-content fade-in-up" style="max-width: 1000px;">
-            <div class="badge">
-                <span class="badge-dot"></span>
+        <div class="grid-bg"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="hero-content">
+            <div class="hero-badge animate-in">
+                <span class="hero-badge-dot"></span>
                 Open Source · Local First · Zero Telemetry
             </div>
-            <h1>Your AI Costs <span>Too Much.</span><br>CORVYN Fixes That.</h1>
-            <p>Route every request to the best free model. See your bill in your currency — ₹, ₦, R$, whatever is yours. Works alongside Claude Code, OpenCode, Cursor, and Aider.</p>
-            <div class="hero-actions">
-                <a href="https://github.com/corvyn-ai/corvyn" target="_blank" class="btn btn-primary" style="padding: 12px 24px;">
+            <h1 class="animate-in delay-1">
+                Stop Overpaying for AI.<br>Start Routing <span class="gradient-text">Smart.</span>
+            </h1>
+            <p class="hero-desc animate-in delay-2">
+                One proxy. Every provider. Zero config pain. CORVYN routes your AI requests to the cheapest model that can handle the job — saving you up to <strong>85%</strong> on API costs. 
+            </p>
+            <div class="hero-stats animate-in delay-2">
+                <div class="hero-stat">
+                    <span class="hero-stat-num">85%</span>
+                    <span class="hero-stat-label">Cost Savings</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">14+</span>
+                    <span class="hero-stat-label">Providers</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num"><0.1ms</span>
+                    <span class="hero-stat-label">Routing Speed</span>
+                </div>
+            </div>
+            <div class="hero-actions animate-in delay-3">
+                <a href="https://github.com/corvyn-ai/corvyn" target="_blank" class="btn btn-primary magnetic-btn">
                     <i class="fab fa-github"></i> Star on GitHub
                 </a>
-                <a href="#install" class="btn btn-secondary" style="padding: 12px 24px;">Read the Docs</a>
+                <a href="#install" class="btn btn-secondary magnetic-btn">
+                    Read the Docs
+                </a>
+            </div>
+        </div>
+
+        <!-- TERMINAL -->
+        <div class="terminal-wrapper animate-in delay-3">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="dot dot-red"></div>
+                    <div class="dot dot-yellow"></div>
+                    <div class="dot dot-green"></div>
+                    <span class="terminal-title">corvyn — zsh</span>
+                </div>
+                <div class="terminal-body" id="terminal">
+                    <div class="terminal-line"><span class="amber">$</span> corvyn start</div>
+                    <div class="terminal-line dim" id="terminal-lines"></div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- TERMINAL -->
-    <div class="container" style="max-width: 800px; margin-bottom: 64px;">
-        <div class="terminal">
-            <div class="terminal-header">
-                <div class="dot dot-red"></div>
-                <div class="dot dot-yellow"></div>
-                <div class="dot dot-green"></div>
-            </div>
-            <div class="terminal-body" id="terminal">
-                <div class="terminal-line"><span class="amber">$</span> corvyn start</div>
-                <div class="terminal-line dim" id="terminal-lines"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- SAVINGS -->
-    <section class="savings-section">
+    <section class="section savings-section">
         <div class="container savings-content">
-            <p class="savings-label" style="color: var(--text-muted); font-family: 'Inter', sans-serif;">CORVYN users saved</p>
-            <div class="savings-amount" id="savings-count" style="font-family: 'Inter', sans-serif;">₹ 0</div>
-            <p class="savings-sub" style="font-family: 'Inter', sans-serif;">in API costs this month</p>
-            <div class="currency-switcher">
+            <p class="savings-label animate-in">CORVYN USERS SAVED</p>
+            <div class="savings-amount animate-in delay-1" id="savings-count">₹ 0</div>
+            <p class="savings-sub animate-in delay-2">in API costs this month</p>
+            <div class="currency-switcher animate-in delay-2">
                 <button class="currency-btn active" data-currency="INR" data-symbol="₹">₹ INR</button>
                 <button class="currency-btn" data-currency="NGN" data-symbol="₦">₦ NGN</button>
                 <button class="currency-btn" data-currency="BRL" data-symbol="R$">R$ BRL</button>
@@ -935,194 +1396,286 @@
         </div>
     </section>
 
+    <!-- MARQUEE -->
+    <div class="marquee-section">
+        <div class="marquee-track">
+            <div class="marquee-item"><i class="fas fa-bolt"></i> 100% Task Classification Accuracy</div>
+            <div class="marquee-item"><i class="fas fa-shield-alt"></i> Zero Telemetry — Nothing Leaves Your Machine</div>
+            <div class="marquee-item"><i class="fas fa-globe"></i> 60+ Currencies Supported</div>
+            <div class="marquee-item"><i class="fas fa-server"></i> 14 Providers · 40+ Models</div>
+            <div class="marquee-item"><i class="fas fa-bolt"></i> <0.1ms Task Classification</div>
+            <div class="marquee-item"><i class="fas fa-code-branch"></i> MIT Licensed · Open Source</div>
+            <div class="marquee-item"><i class="fas fa-bolt"></i> 100% Task Classification Accuracy</div>
+            <div class="marquee-item"><i class="fas fa-shield-alt"></i> Zero Telemetry — Nothing Leaves Your Machine</div>
+            <div class="marquee-item"><i class="fas fa-globe"></i> 60+ Currencies Supported</div>
+            <div class="marquee-item"><i class="fas fa-server"></i> 14 Providers · 40+ Models</div>
+            <div class="marquee-item"><i class="fas fa-bolt"></i> <0.1ms Task Classification</div>
+            <div class="marquee-item"><i class="fas fa-code-branch"></i> MIT Licensed · Open Source</div>
+        </div>
+    </div>
+
     <!-- HOW IT WORKS -->
-    <section class="how-it-works" id="how-it-works">
+    <section class="section" id="how-it-works">
         <div class="container">
-            <h2 class="section-title fade-in-up" style="font-family: 'Inter', sans-serif;">How It Works</h2>
-            <div class="steps-container">
-                <div class="step-card fade-in-up">
-                    <div class="step-icon"><i class="fas fa-terminal"></i></div>
-                    <h3 class="step-title" style="font-family: 'Inter', sans-serif;">You Use Any AI Tool</h3>
-                    <p class="step-desc">OpenCode, Claude Code, Cursor, Aider — just change one URL setting.</p>
+            <div class="section-header">
+                <p class="section-label animate-in">Workflow</p>
+                <h2 class="section-title animate-in delay-1">How It Works</h2>
+                <p class="section-desc animate-in delay-2">Three steps to cut your AI bill by 85% without changing how you work.</p>
+            </div>
+            <div class="bento-grid">
+                <div class="bento-card spotlight-card animate-in">
+                    <div class="bento-icon"><i class="fas fa-terminal"></i></div>
+                    <h3 class="bento-title">You Use Any AI Tool</h3>
+                    <p class="bento-desc">OpenCode, Claude Code, Cursor, Aider — just change one URL setting and you're routing through CORVYN.</p>
                 </div>
-                <div class="step-card fade-in-up-delay">
-                    <div class="step-icon"><i class="fas fa-route"></i></div>
-                    <h3 class="step-title" style="font-family: 'Inter', sans-serif;">CORVYN Routes Smartly</h3>
-                    <p class="step-desc">Classifies every task. Routes simple tasks to free models. Hard tasks to your paid key.</p>
+                <div class="bento-card spotlight-card animate-in delay-1">
+                    <div class="bento-icon"><i class="fas fa-route"></i></div>
+                    <h3 class="bento-title">CORVYN Routes Smartly</h3>
+                    <p class="bento-desc">Classifies every task in &lt;0.1ms. Routes simple tasks to free models. Hard tasks to your paid key.</p>
                 </div>
-                <div class="step-card fade-in-up-later">
-                    <div class="step-icon"><i class="fas fa-wallet"></i></div>
-                    <h3 class="step-title" style="font-family: 'Inter', sans-serif;">You Save Money</h3>
-                    <p class="step-desc">Free models handle 85% of tasks. See exactly what you spend in your currency. Never a surprise bill.</p>
+                <div class="bento-card spotlight-card animate-in delay-2">
+                    <div class="bento-icon"><i class="fas fa-wallet"></i></div>
+                    <h3 class="bento-title">You Save Money</h3>
+                    <p class="bento-desc">Free models handle 85% of tasks. See exactly what you spend in your currency. Never a surprise bill.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- PROVIDERS -->
-    <section class="providers-section" id="providers">
+    <section class="section providers-section" id="providers">
         <div class="container">
-            <h2 class="section-title fade-in-up" style="font-family: 'Inter', sans-serif;">Every Free Model. Every Gateway. One Proxy.</h2>
+            <div class="section-header">
+                <p class="section-label animate-in">Integrations</p>
+                <h2 class="section-title animate-in delay-1">Every Free Model. Every Gateway. One Proxy.</h2>
+                <p class="section-desc animate-in delay-2">14 providers. 40+ models. One config file. Enable only what you have.</p>
+            </div>
             <div class="providers-grid">
-                <!-- FREE -->
-                <div class="provider-card">
-                    <div class="provider-name">Gemini</div>
+                <div class="provider-card spotlight-card animate-in">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=ai.google.dev&sz=64" alt="Gemini" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>G</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">Gemini</span>
+                    </div>
                     <div class="provider-limit">1,500 req/day</div>
                     <span class="provider-badge badge-free">FREE</span>
                 </div>
-                <div class="provider-card">
-                    <div class="provider-name">Mistral</div>
+                <div class="provider-card spotlight-card animate-in delay-1">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=mistral.ai&sz=64" alt="Mistral" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>M</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">Mistral</span>
+                    </div>
                     <div class="provider-limit">500K tok/month</div>
                     <span class="provider-badge badge-free">FREE</span>
                 </div>
-                <div class="provider-card">
-                    <div class="provider-name">OpenRouter</div>
-                    <div class="provider-limit">25+ models</div>
+                <div class="provider-card spotlight-card animate-in delay-2">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=openrouter.ai&sz=64" alt="OpenRouter" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>OR</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">OpenRouter</span>
+                    </div>
+                    <div class="provider-limit">25+ free models</div>
                     <span class="provider-badge badge-free">FREE</span>
                 </div>
-                <!-- LOCAL -->
-                <div class="provider-card">
-                    <div class="provider-name">Ollama</div>
-                    <div class="provider-limit">Unlimited</div>
+                <div class="provider-card spotlight-card animate-in delay-3">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=opencode.ai&sz=64" alt="OpenCode" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>OC</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">OpenCode Zen</span>
+                    </div>
+                    <div class="provider-limit">Free + Pay-as-you-go</div>
+                    <span class="provider-badge badge-free">FREE</span>
+                </div>
+                <div class="provider-card spotlight-card animate-in">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=ollama.com&sz=64" alt="Ollama" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>O</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">Ollama</span>
+                    </div>
+                    <div class="provider-limit">Unlimited · Local</div>
                     <span class="provider-badge badge-local">LOCAL</span>
                 </div>
-                <!-- PAID -->
-                <div class="provider-card">
-                    <div class="provider-name">Groq</div>
+                <div class="provider-card spotlight-card animate-in delay-1">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=groq.com&sz=64" alt="Groq" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>G</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">Groq</span>
+                    </div>
                     <div class="provider-limit">Pay-per-token</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
-                <div class="provider-card">
-                    <div class="provider-name">Cerebras</div>
+                <div class="provider-card spotlight-card animate-in delay-2">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=cerebras.ai&sz=64" alt="Cerebras" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>C</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">Cerebras</span>
+                    </div>
                     <div class="provider-limit">Pay-per-token</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
-                <div class="provider-card">
-                    <div class="provider-name">SambaNova</div>
+                <div class="provider-card spotlight-card animate-in delay-3">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=sambanova.ai&sz=64" alt="SambaNova" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>S</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">SambaNova</span>
+                    </div>
                     <div class="provider-limit">Pay-per-token</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
-                <div class="provider-card">
-                    <div class="provider-name">Anthropic</div>
+                <div class="provider-card spotlight-card animate-in">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=anthropic.com&sz=64" alt="Anthropic" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>A</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">Anthropic</span>
+                    </div>
                     <div class="provider-limit">Claude Sonnet</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
-                <div class="provider-card">
-                    <div class="provider-name">OpenAI</div>
+                <div class="provider-card spotlight-card animate-in delay-1">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=openai.com&sz=64" alt="OpenAI" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>OI</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">OpenAI</span>
+                    </div>
                     <div class="provider-limit">GPT-4o</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
-                <div class="provider-card">
-                    <div class="provider-name">DeepSeek</div>
+                <div class="provider-card spotlight-card animate-in delay-2">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=deepseek.com&sz=64" alt="DeepSeek" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>D</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">DeepSeek</span>
+                    </div>
                     <div class="provider-limit">Cheapest paid</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
-                <div class="provider-card">
-                    <div class="provider-name">Kimi</div>
+                <div class="provider-card spotlight-card animate-in delay-3">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=moonshot.cn&sz=64" alt="Kimi" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>K</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">Kimi</span>
+                    </div>
                     <div class="provider-limit">K2.6 · Agentic</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
-                <!-- GATEWAY -->
-                <div class="provider-card" style="border-color: #f48120; background: linear-gradient(135deg, #fff8f0, #ffffff);">
-                    <div class="provider-name" style="display: flex; align-items: center; gap: 8px;">
-                        <svg width="20" height="20" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" fill="#f48120"/><path d="M30 50h40M50 30v40" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>
-                        Cloudflare AI
+                <div class="provider-card gateway spotlight-card animate-in delay-1">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=cloudflare.com&sz=64" alt="Cloudflare" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>CF</span>'">
                     </div>
-                    <div class="provider-limit">Gateway · 20+ providers</div>
-                    <span class="provider-badge" style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80;">GATEWAY</span>
+                    <div class="provider-header">
+                        <span class="provider-name">Cloudflare AI Gateway</span>
+                    </div>
+                    <div class="provider-limit">20+ providers · Edge caching · Analytics</div>
+                    <span class="provider-badge badge-gateway">GATEWAY</span>
                 </div>
             </div>
         </div>
     </section>
 
-
-
-    <!-- CLOUDFLARE AI GATEWAY -->
-    <section style="padding: 80px 0; background: linear-gradient(180deg, #fff8f0 0%, #ffffff 100%); border-top: 1px solid #ffe0b2; border-bottom: 1px solid var(--border);">
+    <!-- CLOUDFLARE -->
+    <section class="section cf-section">
         <div class="container">
-            <h2 class="section-title fade-in-up" style="font-family: 'Inter', sans-serif;">Cloudflare AI Gateway Built In</h2>
-            <p style="text-align: center; color: var(--text-muted); max-width: 600px; margin: -40px auto 48px; font-size: 1.05rem;">Route through Cloudflare's edge network. Get caching, analytics, rate limiting, guardrails, and DLP — with zero extra code.</p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 960px; margin: 0 auto;">
-                <div class="oss-card" style="text-align: center;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 4px;">3 Modes</h3>
-                    <p>Unified Billing · BYOK · Passthrough</p>
+            <div class="section-header">
+                <p class="section-label animate-in">Cloudflare Integration</p>
+                <h2 class="section-title animate-in delay-1">Cloudflare AI Gateway Built In</h2>
+                <p class="section-desc animate-in delay-2">Route through Cloudflare's edge network. Get caching, analytics, rate limiting, guardrails, and DLP — with zero extra code.</p>
+            </div>
+            <div class="cf-grid">
+                <div class="cf-card animate-in">
+                    <h3>3</h3>
+                    <p>Billing Modes</p>
                 </div>
-                <div class="oss-card" style="text-align: center;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 4px;">20+</h3>
-                    <p>Upstream providers via one endpoint</p>
+                <div class="cf-card animate-in delay-1">
+                    <h3>20+</h3>
+                    <p>Upstream Providers</p>
                 </div>
-                <div class="oss-card" style="text-align: center;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 4px;">Edge Cache</h3>
-                    <p>Identical requests served from CF cache</p>
+                <div class="cf-card animate-in delay-2">
+                    <h3>Edge</h3>
+                    <p>Cache & Analytics</p>
                 </div>
-                <div class="oss-card" style="text-align: center;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 4px;">Per-Model</h3>
-                    <p>Accurate cost tracking per model</p>
+                <div class="cf-card animate-in delay-3">
+                    <h3>Per-Model</h3>
+                    <p>Cost Tracking</p>
                 </div>
             </div>
-            <div style="text-align: center; margin-top: 40px;">
-                <div style="display: inline-block; background: var(--terminal-bg); border-radius: 8px; padding: 16px 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #a0a0a0; text-align: left; border: 1px solid var(--terminal-border);">
-                    <span style="color: #888;"># corvyn.config.toml</span><br>
-                    <span style="color: #fff;">[providers.cloudflare_ai]</span><br>
-                    enabled &nbsp;&nbsp;&nbsp;= <span style="color: #27c93f;">true</span><br>
-                    account_id = <span style="color: #ffbd2e;">"$CF_ACCOUNT_ID"</span><br>
-                    gateway_id = <span style="color: #ffbd2e;">"default"</span><br>
-                    mode &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span style="color: #ffbd2e;">"unified"</span><br>
-                    api_token &nbsp;= <span style="color: #ffbd2e;">"$CF_AIG_API_TOKEN"</span><br>
-                    models &nbsp;&nbsp;&nbsp;&nbsp;= [<span style="color: #ffbd2e;">"workers-ai/@cf/moonshotai/kimi-k2.6"</span>, ...]
-                </div>
+            <div class="cf-code animate-in">
+                <span class="comment"># corvyn.config.toml</span><br>
+                <span class="section">[providers.cloudflare_ai]</span><br>
+                <span class="key">enabled</span>    = <span class="bool">true</span><br>
+                <span class="key">account_id</span> = <span class="string">"$CF_ACCOUNT_ID"</span><br>
+                <span class="key">gateway_id</span> = <span class="string">"default"</span><br>
+                <span class="key">mode</span>       = <span class="string">"unified"</span><br>
+                <span class="key">api_token</span>  = <span class="string">"$CF_AIG_API_TOKEN"</span><br>
+                <span class="key">models</span>     = [<span class="string">"workers-ai/@cf/moonshotai/kimi-k2.6"</span>, ...]
             </div>
         </div>
     </section>
 
-    <!-- CURRENCY SHOWCASE -->
-    <section class="currency-showcase">
+    <!-- CURRENCY -->
+    <section class="section currency-section">
         <div class="container currency-display">
-            <h3 class="currency-main" id="currency-display" style="font-family: 'Inter', sans-serif;">₹ 2,840 saved today</h3>
-            <p class="currency-sub" style="font-family: 'Inter', sans-serif;">Auto-detected from your system locale. 60+ currencies supported.</p>
+            <p class="section-label animate-in">Global by Default</p>
+            <h3 class="currency-main animate-in delay-1" id="currency-display">₹ 2,840 saved today</h3>
+            <p class="currency-sub animate-in delay-2">Auto-detected from your system locale. 60+ currencies supported with real-time exchange rates.</p>
         </div>
     </section>
 
     <!-- INSTALL -->
-    <section class="install-section" id="install">
+    <section class="section install-section" id="install">
         <div class="container">
-            <h2 class="section-title fade-in-up" style="font-family: 'Inter', sans-serif;">Up in 5 Minutes</h2>
-            <div class="install-steps">
-                <div class="install-step fade-in-up">
-                    <div class="step-header">
-                        <span class="step-title">1. Install</span>
-                        <button class="copy-btn" onclick="copyCode('code1', this)"><i class="far fa-copy"></i></button>
+            <div class="section-header">
+                <p class="section-label animate-in">Quick Start</p>
+                <h2 class="section-title animate-in delay-1">Up in 5 Minutes</h2>
+                <p class="section-desc animate-in delay-2">Install, configure, and start routing. Works with any OpenAI-compatible client.</p>
+            </div>
+            <div class="install-grid">
+                <div class="install-card animate-in">
+                    <div class="install-header">
+                        <span class="install-title"><span class="install-step-num">1</span>Install</span>
+                        <button class="copy-btn" onclick="copyCode('code1', this)" aria-label="Copy"><i class="far fa-copy"></i></button>
                     </div>
-                    <div class="step-code">
-                        <pre><code class="mono" id="code1">$ curl -fsSL https://raw.githubusercontent.com/corvyn-ai/corvyn/main/install.sh | bash</code></pre>
-                    </div>
-                </div>
-                
-                <div class="install-step fade-in-up-delay">
-                    <div class="step-header">
-                        <span class="step-title">2. Configure</span>
-                        <button class="copy-btn" onclick="copyCode('code2', this)"><i class="far fa-copy"></i></button>
-                    </div>
-                    <div class="step-code">
-                        <pre><code class="mono" id="code2">$ corvyn init</code></pre>
+                    <div class="install-code">
+                        <pre><code id="code1">curl -fsSL https://raw.githubusercontent.com/corvyn-ai/corvyn/main/install.sh | bash</code></pre>
                     </div>
                 </div>
-                <div class="install-step fade-in-up-later">
-                    <div class="step-header">
-                        <span class="step-title">3. Start</span>
-                        <button class="copy-btn" onclick="copyCode('code3', this)"><i class="far fa-copy"></i></button>
+                <div class="install-card animate-in delay-1">
+                    <div class="install-header">
+                        <span class="install-title"><span class="install-step-num">2</span>Configure</span>
+                        <button class="copy-btn" onclick="copyCode('code2', this)" aria-label="Copy"><i class="far fa-copy"></i></button>
                     </div>
-                    <div class="step-code">
-                        <pre><code class="mono" id="code3">$ corvyn start</code></pre>
+                    <div class="install-code">
+                        <pre><code id="code2">corvyn init</code></pre>
                     </div>
                 </div>
-                <div class="install-step fade-in-up-later">
-                    <div class="step-header">
-                        <span class="step-title">4. Connect OpenCode</span>
-                        <button class="copy-btn" onclick="copyCode('code4', this)"><i class="far fa-copy"></i></button>
+                <div class="install-card animate-in delay-2">
+                    <div class="install-header">
+                        <span class="install-title"><span class="install-step-num">3</span>Start</span>
+                        <button class="copy-btn" onclick="copyCode('code3', this)" aria-label="Copy"><i class="far fa-copy"></i></button>
                     </div>
-                    <div class="step-code">
-                        <pre><code class="mono" id="code4">{
+                    <div class="install-code">
+                        <pre><code id="code3">corvyn start</code></pre>
+                    </div>
+                </div>
+                <div class="install-card animate-in delay-3">
+                    <div class="install-header">
+                        <span class="install-title"><span class="install-step-num">4</span>Connect OpenCode</span>
+                        <button class="copy-btn" onclick="copyCode('code4', this)" aria-label="Copy"><i class="far fa-copy"></i></button>
+                    </div>
+                    <div class="install-code">
+                        <pre><code id="code4">{
   "provider": {
     "corvyn": {
       "npm": "@ai-sdk/openai-compatible",
@@ -1143,23 +1696,23 @@
     </section>
 
     <!-- OPEN SOURCE -->
-    <section class="opensource-section">
+    <section class="section oss-section">
         <div class="container oss-content">
-            <a href="https://github.com/corvyn-ai/corvyn" target="_blank" class="oss-btn">
-                <i class="fab fa-github" style="font-size: 1.5rem;"></i>
-                <span style="font-family: 'Inter', sans-serif;">github.com/corvyn-ai/corvyn</span>
+            <a href="https://github.com/corvyn-ai/corvyn" target="_blank" class="oss-btn animate-in">
+                <i class="fab fa-github" style="font-size: 1.25rem;"></i>
+                <span>github.com/corvyn-ai/corvyn</span>
             </a>
-            <p class="oss-desc" style="font-family: 'Inter', sans-serif;">Built in Tamil Nadu. For developers everywhere.</p>
-            <div class="oss-cards">
-                <div class="oss-card">
+            <p class="oss-desc animate-in delay-1">Built in Tamil Nadu. For developers everywhere.</p>
+            <div class="oss-grid">
+                <div class="oss-card animate-in">
                     <h3>MIT Licensed</h3>
                     <p>Fork it, use it, build on it</p>
                 </div>
-                <div class="oss-card">
+                <div class="oss-card animate-in delay-1">
                     <h3>Local First</h3>
                     <p>Nothing leaves your machine</p>
                 </div>
-                <div class="oss-card">
+                <div class="oss-card animate-in delay-2">
                     <h3>Community Built</h3>
                     <p>PRs and issues welcome</p>
                 </div>
@@ -1168,30 +1721,74 @@
     </section>
 
     <!-- FOOTER -->
-        <footer class="footer">
-            <div class="container footer-content">
-                <div class="footer-left">
-                    <a href="#" class="logo footer-logo">
-                        <span class="logo-text">CORVYN</span>
-                    </a>
-                    <span class="footer-built">Built with <i class="fas fa-heart" style="color: #e74c3c"></i> in Tamil Nadu, India</span>
-                </div>
-                <div class="footer-links">
-                    <a href="https://github.com/corvyn-ai/corvyn" target="_blank" style="font-family: 'Inter', sans-serif;">GitHub</a>
-                    <a href="https://corvyn.cc/docs" target="_blank" style="font-family: 'Inter', sans-serif;">Docs</a>
-                </div>
-                <div class="footer-right">Making frontier AI affordable for the other 45 million developers</div>
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-left">
+                <div class="logo-mark">C</div>
+                <span class="footer-built">Built with <i class="fas fa-heart" style="color: #e74c3c; font-size: 0.75rem;"></i> in Tamil Nadu, India</span>
             </div>
-        </footer>
+            <div class="footer-links">
+                <a href="https://github.com/corvyn-ai/corvyn" target="_blank">GitHub</a>
+                <a href="https://corvyn.cc/docs" target="_blank">Docs</a>
+            </div>
+            <div class="footer-right">Making frontier AI affordable for every developer</div>
+        </div>
+    </footer>
 
     <script>
+        // Scroll progress bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('scrollProgress').style.width = scrolled + '%';
+        });
+
+        // Spotlight effect on cards
+        document.querySelectorAll('.spotlight-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Magnetic buttons
+        document.querySelectorAll('.magnetic-btn').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translate(0, 0)';
+            });
+        });
+
+        // Smooth parallax on orbs
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            document.querySelectorAll('.orb').forEach((orb, i) => {
+                const speed = 0.1 + (i * 0.05);
+                orb.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+
+        // Mobile menu
+        function toggleMobileMenu() {
+            document.getElementById('mobileNav').classList.toggle('open');
+        }
+
         // Typewriter terminal effect
         const terminalLines = [
 '+----------------------------------------------+',
 '|  CORVYN v0.1.0                               |',
 '+----------------------------------------------+',
 '|  Proxy     → localhost:4000                 |',
-'|  Currency  → ₹ INR  │  Indian Rupee  │  manual|',
+'|  Currency  → ₹ INR  │  Indian Rupee  │  auto|',
 '+----------------------------------------------+',
 '|  DEDUPLICATION                               |',
 '|  - google/gemini-2.5-pro                     |',
@@ -1201,49 +1798,28 @@
 '+----------------------------------------------+',
 '|  FREE PROVIDERS                              |',
 '|  Gemini     ✓  15 rpm / 1,500 rpd           |',
-'|  Groq       ✗  not configured               |',
 '|  Mistral    ✗  not configured               |',
+'|  OpenRouter ✓  13 free models               |',
 '+----------------------------------------------+',
-'|  OPENROUTER                                  |',
-'|  Free models  ✗  13 models available        |',
-'|  Last used    →  nvidia/nemotron-3-super-120b-a12b:free|',
-'|  Paid models  ✗  17 models configured       |',
-'+----------------------------------------------+',
-'|  OPENCODE GO ($10/mo subscription)           |',
+'|  OPENCODE GO ($10/mo)                        |',
 '|  Models     ✓  14 models configured         |',
 '|    → glm-5                                  |',
 '|    → glm-5.1                                |',
 '|    → kimi-k2.5                              |',
 '|    + 11 more                                 |',
 '+----------------------------------------------+',
-'|  OPENCODE ZEN (pay-as-you-go)                |',
-'|  OpenCode Zen  ✗  not configured            |',
-'+----------------------------------------------+',
 '|  CLOUDFLARE AI GATEWAY                       |',
 '|  Gateway    ✓  default (unified billing)    |',
 '|  Models     ✓  7 models configured          |',
 '|    → workers-ai/@cf/moonshotai/kimi-k2.6    |',
 '|    → workers-ai/@cf/openai/gpt-oss-120b     |',
-'|    → workers-ai/@cf/nvidia/nemotron-3-120b.. |',
-'|    + 4 more                                  |',
-'+----------------------------------------------+',
-'|  LOCAL                                       |',
-'|  Ollama     ✗  disabled                     |',
 '+----------------------------------------------+',
 '|  PAID (your keys)                            |',
 '|  Cerebras   ✓  pay-per-token                |',
-'|  Sambanova  ✓  pay-per-token                |',
 '|  Anthropic  ✗  not configured               |',
-'|  Openai     ✗  not configured               |',
-'|  Deepseek   ✗  not configured               |',
-'|  Kimi       ✗  not configured               |',
 '+----------------------------------------------+',
 '|  BUDGET                                      |',
 '|  Daily    ₹30.00  |  Weekly  ₹150.00         |',
-'+----------------------------------------------+',
-'|  OPENCODE SETUP                              |',
-'|  OPENAI_BASE_URL=http://localhost:4000       |',
-'|  OPENAI_API_KEY=corvyn                       |',
 '+----------------------------------------------+',
 '',
 '  Server running on http://localhost:4000',
@@ -1251,31 +1827,27 @@
 '',
 '[CORVYN] Trying openrouter (z-ai/glm-4.5-air:free) [free]...',
 '[CORVYN] ✓ openrouter | z-ai/glm-4.5-air:free | medium [free]',
-'[CORVYN] ✓ openrouter(FREE) z-ai/glm-4.5-air:free | 51,445in/156out (51,601) | ₹0.00 cost, ₹14.89 saved | 21.7s',
+'[CORVYN] ✓ openrouter(FREE) z-ai/glm-4.5-air:free | 51,445in/156out | ₹0.00 cost, ₹14.89 saved | 21.7s',
 ''
 ];
 
-        let lineIndex = 0;
+        // Terminal - render all lines instantly (no animation delay)
         const terminalElement = document.getElementById('terminal-lines');
-
-        function typeLine() {
-            if (lineIndex < terminalLines.length) {
-                const div = document.createElement('div');
-                div.className = 'terminal-line';
-                div.textContent = terminalLines[lineIndex];
-                terminalElement.appendChild(div);
-                lineIndex++;
-                setTimeout(typeLine, lineIndex > 18 ? 400 : 80);
-            }
-        }
-
-        setTimeout(typeLine, 800);
+        
+        terminalLines.forEach((line) => {
+            const div = document.createElement('div');
+            div.className = 'terminal-line';
+            if (line.includes('✓')) div.classList.add('green');
+            else if (line.includes('CORVYN')) div.classList.add('header');
+            else if (line.includes('→')) div.classList.add('blue');
+            div.textContent = line;
+            terminalElement.appendChild(div);
+        });
 
         // Savings counter animation
-        function animateCounter(element, target, duration = 3000) {
-            const start = 0;
+        function animateCounter(element, target, duration = 2500) {
             const increment = target / (duration / 16);
-            let current = start;
+            let current = 0;
             
             const timer = setInterval(() => {
                 current += increment;
@@ -1293,6 +1865,7 @@
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         animateCounter(savingsElement, 124847);
+                        observer.unobserve(entry.target);
                     }
                 });
             }, { threshold: 0.5 });
@@ -1302,21 +1875,10 @@
         // Currency switcher
         let currentCurrency = 'INR';
         const currencyRates = {
-            INR: 1,
-            NGN: 0.052,
-            BRL: 0.16,
-            IDR: 2100,
-            USD: 0.012,
-            BDT: 1.03
+            INR: 1, NGN: 0.052, BRL: 0.16, IDR: 2100, USD: 0.012, BDT: 1.03
         };
-
         const currencyLabels = {
-            INR: '₹',
-            NGN: '₦',
-            BRL: 'R$',
-            IDR: 'Rp',
-            USD: '$',
-            BDT: '৳'
+            INR: '₹', NGN: '₦', BRL: 'R$', IDR: 'Rp', USD: '$', BDT: '৳'
         };
 
         document.querySelectorAll('.currency-btn').forEach(btn => {
@@ -1324,18 +1886,16 @@
                 document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentCurrency = btn.dataset.currency;
-                
-                // Update savings display
                 const rupees = 124847;
                 const converted = (rupees * currencyRates[currentCurrency]).toFixed(2);
-                savingsElement.textContent = `${currencyLabels[currentCurrency]} ${converted.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+                savingsElement.textContent = `${currencyLabels[currentCurrency]} ${parseFloat(converted).toLocaleString()}`;
             });
         });
 
         // Currency cycle display
         const currencies = [
             { symbol: '₹', amount: '2,840', country: 'India' },
-            { symbol: '₦', amount: '1,24,000', country: 'Nigeria' },
+            { symbol: '₦', amount: '124,000', country: 'Nigeria' },
             { symbol: 'R$', amount: '890', country: 'Brazil' },
             { symbol: 'Rp', amount: '456,000', country: 'Indonesia' },
             { symbol: '৳', amount: '3,200', country: 'Bangladesh' }
@@ -1348,73 +1908,69 @@
             currencyIndex = (currencyIndex + 1) % currencies.length;
             const currency = currencies[currencyIndex];
             currencyDisplay.style.animation = 'none';
-            currencyDisplay.offsetHeight; /* trigger reflow */
+            currencyDisplay.offsetHeight;
             currencyDisplay.style.animation = 'fade 2s ease-in-out';
             currencyDisplay.textContent = `${currency.symbol} ${currency.amount} saved today`;
-        }, 2000);
+        }, 2500);
 
         // Copy to clipboard
         function copyCode(elementId, btn) {
             const codeText = document.getElementById(elementId).innerText;
-            const cleanText = codeText.replace(/^\$\s/gm, ''); // Remove $ prompts
+            const cleanText = codeText.replace(/^\$\s/gm, '');
 
-            // Fallback for older browsers or when running locally without HTTPS
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(cleanText).then(() => {
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                    btn.style.color = 'var(--success)';
+                    setTimeout(() => {
+                        btn.innerHTML = original;
+                        btn.style.color = '';
+                    }, 2000);
+                }).catch(() => fallbackCopy(cleanText, btn));
+            } else {
+                fallbackCopy(cleanText, btn);
+            }
+        }
+
+        function fallbackCopy(text, btn) {
             const textArea = document.createElement("textarea");
-            textArea.value = cleanText;
-            
-            // Avoid scrolling to bottom
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.position = "fixed";
-            
+            textArea.value = text;
+            textArea.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-
             try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    const original = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i>';
-                    setTimeout(() => {
-                        btn.innerHTML = original;
-                    }, 2000);
-                } else {
-                    console.error('Fallback: Copying text command was unsuccessful');
-                }
+                document.execCommand('copy');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.style.color = 'var(--success)';
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.style.color = '';
+                }, 2000);
             } catch (err) {
-                console.error('Fallback: Oops, unable to copy', err);
+                console.error('Copy failed', err);
             }
-
             document.body.removeChild(textArea);
         }
 
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-
         // Scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
+        const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in-up');
+                    entry.target.classList.add('visible');
                 }
             });
-        }, observerOptions);
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
-        document.querySelectorAll('.provider-card, .step-card, .install-step, .classifier-card').forEach(el => {
-            observer.observe(el);
+        document.querySelectorAll('.animate-in').forEach(el => {
+            scrollObserver.observe(el);
+        });
+
+        // Trigger hero animations immediately
+        document.querySelectorAll('.hero .animate-in').forEach(el => {
+            setTimeout(() => el.classList.add('visible'), 100);
         });
     </script>
 </body>
