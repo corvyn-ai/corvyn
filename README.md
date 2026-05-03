@@ -1,44 +1,50 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Version](https://img.shields.io/badge/version-0.1.4-blue)
 ![Built with Bun](https://img.shields.io/badge/built%20with-Bun-orange)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
-![Free](https://img.shields.io/badge/cost-free%20forever-brightgreen)
 ![Currencies](https://img.shields.io/badge/currencies-60%2B-yellow)
 
 # CORVYN
 
-> CORVYN routes your AI coding requests to free models automatically — and shows you exactly what it costs in your local currency.
+> AI routing proxy that uses free models automatically and shows costs in your local currency.
 
-Local AI routing proxy for OpenCode. Routes requests across free tiers, local models, and paid providers based on task type, quota, and availability.
+Local AI routing proxy for [OpenCode](https://opencode.ai). Routes requests across free tiers, local models, subscription gateways, and paid providers based on task type, quota, and availability.
 
 ## Features
 
-- **Config-driven** — all providers are optional, enable only what you have
-- **Task-aware routing** — classifies requests (security, complex, test, debug, medium, simple) and routes accordingly
+- **Config-driven** — all providers optional, enable only what you have
+- **Task-aware routing** — TF-IDF classifier (251/251, 100% accuracy, 0.07ms) picks the best provider per request
+- **Three routing modes** — `auto` (free → subscription → paid), `free` (free only), `paid` (paid only)
 - **Free tier quota management** — tracks RPM/RPD/TPM limits, auto-resets at midnight
-- **Deduplication** — direct API keys automatically take priority over OpenRouter for the same models
-- **Cost tracking** — records savings vs Claude Sonnet pricing
-- **Multi-currency** — auto-detects from system locale or set manually (60+ currencies supported)
+- **Subscription gateway** — OpenCode Go ($10/mo flat) and OpenCode Zen (pay-as-you-go) support
+- **Deduplication** — direct API keys take priority over OpenRouter for the same models
+- **Cost tracking** — records savings vs Claude Sonnet pricing, shown in your local currency
+- **Multi-currency** — auto-detects from system locale or set manually (60+ currencies)
 - **Streaming preserved** — full SSE streaming for all responses
 - **Tool call support** — passes through tool calls with correct indices
+
+## Install
+
+One command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/corvyn-ai/corvyn/main/install.sh | bash
+```
+
+Or download a binary from [github.com/corvyn-ai/corvyn/releases/latest](https://github.com/corvyn-ai/corvyn/releases/latest):
+
+| Binary | Platform |
+|---|---|
+| `corvyn-macos-arm64` | Mac Apple Silicon |
+| `corvyn-macos-x64` | Mac Intel |
+| `corvyn-linux-x64` | Linux |
+| `corvyn-windows-x64` | Windows |
 
 ## Quick Start
 
 ```bash
-# Install dependencies
-bun install
-
-# Configure your providers
-# Edit corvyn.config.toml and add your API keys
-# Minimum needed: one free key (Gemini or Groq)
-# Get Gemini free at: aistudio.google.com
-# Get Groq free at: console.groq.com
-
-# Start CORVYN
-bun start
-
-# In a new terminal — run OpenCode
-opencode
-# Select corvyn/auto as your model
+corvyn init      # Create config, add your API keys
+corvyn start     # Start the proxy on localhost:4000
 ```
 
 ## Connecting to OpenCode
@@ -48,8 +54,7 @@ CORVYN works as a drop-in provider for OpenCode. All requests route through CORV
 ### Step 1 — Start CORVYN
 
 ```bash
-cd corvyn
-bun start
+corvyn start
 ```
 
 Wait until you see:
@@ -59,12 +64,7 @@ Server running on http://localhost:4000
 
 ### Step 2 — Create OpenCode Config
 
-Open or create:
-```
-~/.config/opencode/config.json
-```
-
-Add CORVYN as a provider:
+Open or create `~/.config/opencode/config.json`:
 
 ```json
 {
@@ -77,21 +77,9 @@ Add CORVYN as a provider:
         "baseURL": "http://localhost:4000/v1"
       },
       "models": {
-        "auto": {
-          "name": "CORVYN Auto Router"
-        },
-        "complex": {
-          "name": "CORVYN Complex Tasks"
-        },
-        "simple": {
-          "name": "CORVYN Simple Tasks"
-        },
-        "debug": {
-          "name": "CORVYN Debug Tasks"
-        },
-        "test": {
-          "name": "CORVYN Test Writer"
-        }
+        "auto": { "name": "CORVYN Auto Router" },
+        "free": { "name": "CORVYN Free Only" },
+        "paid": { "name": "CORVYN Paid Only" }
       }
     }
   },
@@ -100,10 +88,6 @@ Add CORVYN as a provider:
 ```
 
 ### Step 3 — Add API Key
-
-```bash
-mkdir -p ~/.local/share/opencode
-```
 
 Create or edit `~/.local/share/opencode/auth.json`:
 
@@ -117,8 +101,6 @@ Create or edit `~/.local/share/opencode/auth.json`:
 
 ### Step 4 — Run OpenCode
 
-Open a new terminal:
-
 ```bash
 opencode
 ```
@@ -127,23 +109,17 @@ OpenCode now shows CORVYN in the provider list. Select `corvyn/auto` — CORVYN 
 
 ### How Model Selection Works
 
-You don't need to pick a model manually. CORVYN classifies every task and picks automatically:
-
-| You select      | CORVYN routes to              |
-|-----------------|-------------------------------|
-| corvyn/auto     | Best available for task       |
-| corvyn/complex  | Powerful model (Nemotron etc) |
-| corvyn/simple   | Fast free model (Gemini etc)  |
-| corvyn/debug    | Best for bug fixing (Groq)    |
-| corvyn/test     | Best for test writing         |
+| You select | What happens |
+|---|---|
+| `corvyn/auto` | Classifies task, tries free → subscription → paid |
+| `corvyn/free` | Free-tier providers only, no paid fallback |
+| `corvyn/paid` | Skips free tier, uses paid providers directly |
 
 ### Verify It's Working
 
 In your CORVYN terminal you should see:
 ```
-[CORVYN] → openrouter | minimax/minimax-m2.5:free | medium
-[CORVYN] → groq       | llama-3.3-70b             | debug
-[CORVYN] → ollama     | qwen2.5-coder:7b          | simple
+[CORVYN] ✓ openrouter(FREE) qwen/qwen3-coder:free | 33,892in/153out (34,045) | ₹0.00 cost, ₹9.88 saved | 8.1s
 ```
 
 Every request logged. Every model shown. Every cost tracked.
@@ -154,62 +130,94 @@ Every request logged. Every model shown. Every cost tracked.
 corvyn stats
 ```
 
-Output:
 ```
-Today: 47 requests
-Free tier:  41 (87%)
-Local:       4 (9%)
-Paid:        2 (4%)
-Cost:      ₹1.20
-Saved:    ₹340.00
+CORVYN Daily Stats
+══════════════════════════════
+Total Requests:  31
+Free Tier:       26
+Local (Ollama):  0
+Paid:            5
+──────────────────────────────
+Cost:            ₹0.00
+Saved:           ₹388.83
+──────────────────────────────
+Budget (daily):  ₹0.00 / ₹30.00 (0%)
+Budget (weekly): ₹232.06 / ₹150.00 (2%)
+Budget (month):  ₹232.06 / ₹500.00 (0%)
 ```
+
+## Classifier
+
+TF-IDF + tiebreaker rules. Zero ML models. Zero API calls. Pure TypeScript.
+
+- **251/251** test cases — 100% accuracy
+- **0.07ms** per classification
+
+Categories (highest to lowest priority):
+
+| Category | Triggers on |
+|---|---|
+| `security` | auth, encrypt, jwt, xss, csrf, injection |
+| `complex` | architect, design, system, infrastructure |
+| `generate` | create, write, build, scaffold |
+| `test` | test, spec, jest, vitest, mocha |
+| `debug` | fix, bug, error, crash, "not working" |
+| `medium` | refactor, improve, optimize, update (default) |
+| `simple` | explain, describe, what, how |
 
 ## Commands
 
-| Command           | What it does                        |
-|-------------------|-------------------------------------|
-| corvyn start      | Start the proxy server              |
-| corvyn launch     | Start proxy + open OpenCode         |
-| corvyn stats      | Show today's usage and savings      |
-| corvyn quota      | Show free tier quota remaining      |
-| corvyn doctor     | Check setup and diagnose issues     |
-| corvyn currency   | Change your display currency        |
-| corvyn init       | Interactive first-time setup wizard |
-| corvyn last       | Show last 5 routed requests         |
+| Command | What it does |
+|---|---|
+| `corvyn start` | Start the proxy server |
+| `corvyn stats` | Show today's usage and savings |
+| `corvyn quota` | Show free tier quota remaining |
+| `corvyn init` | Interactive first-time setup wizard |
+| `corvyn doctor` | Check setup and diagnose issues |
+| `corvyn currency` | View or change display currency |
 
 ## Supported Providers
 
 ### Free Providers (no cost)
 
-| Provider   | Free Limit      | Get Key At              |
-|------------|-----------------|-------------------------|
-| Gemini     | 1,500 req/day   | aistudio.google.com     |
-| Groq       | 14,400 req/day  | console.groq.com        |
-| Cerebras   | 1,700 req/day   | cloud.cerebras.ai       |
-| SambaNova  | 1,000 req/day   | cloud.sambanova.ai      |
-| Mistral    | 500K tok/month  | console.mistral.ai      |
-| OpenRouter | 25+ free models | openrouter.ai           |
-| Ollama     | Unlimited local | ollama.ai               |
+| Provider | Free Limit | Get Key At |
+|---|---|---|
+| Gemini | 1,500 req/day | [aistudio.google.com](https://aistudio.google.com) |
+| Cerebras | 1,700 req/day | [cloud.cerebras.ai](https://cloud.cerebras.ai) |
+| Groq | 14,400 req/day | [console.groq.com](https://console.groq.com) |
+| SambaNova | 1,000 req/day | [cloud.sambanova.ai](https://cloud.sambanova.ai) |
+| Mistral | 500K tok/month | [console.mistral.ai](https://console.mistral.ai) |
+| OpenRouter | 25+ free models | [openrouter.ai](https://openrouter.ai) |
+| Ollama | Unlimited local | [ollama.ai](https://ollama.ai) |
+
+### Subscription Gateways
+
+| Provider | Pricing | Models | Get Access At |
+|---|---|---|---|
+| OpenCode Go | $10/mo flat | 14 models (GLM, Kimi, MiMo, MiniMax, Qwen, DeepSeek) | [opencode.ai](https://opencode.ai) |
+| OpenCode Zen | Pay-as-you-go | Free + paid tiers | [opencode.ai](https://opencode.ai) |
 
 ### Paid Providers (your own keys)
 
-| Provider   | Why Use It              | Get Key At          |
-|------------|-------------------------|---------------------|
-| Anthropic  | Best for complex tasks  | console.anthropic.com|
-| OpenAI     | GPT-4o when needed      | platform.openai.com |
-| DeepSeek   | Cheapest paid option    | platform.deepseek.com|
+| Provider | Why Use It | Get Key At |
+|---|---|---|
+| Anthropic | Best for complex tasks | [console.anthropic.com](https://console.anthropic.com) |
+| OpenAI | GPT-5 when needed | [platform.openai.com](https://platform.openai.com) |
+| DeepSeek | Cheapest paid option | [platform.deepseek.com](https://platform.deepseek.com) |
+
+All providers use the OpenAI-compatible API via `baseURL`. One SDK (`openai`) handles everything.
 
 ## Local Currency Support
 
-CORVYN auto-detects your currency from system locale. All costs and savings shown in YOUR money.
+CORVYN auto-detects your currency from system locale. All costs and savings shown in your money.
 
-| Country    | Currency | Example savings display  |
-|------------|----------|--------------------------|
-| India      | ₹ INR    | Saved ₹340 today         |
-| Nigeria    | ₦ NGN    | Saved ₦12,400 today      |
-| Brazil     | R$ BRL   | Saved R$89 today         |
-| Indonesia  | Rp IDR   | Saved Rp156,000 today    |
-| Pakistan   | ₨ PKR    | Saved ₨940 today         |
+| Country | Currency | Example savings display |
+|---|---|---|
+| India | ₹ INR | Saved ₹340 today |
+| Nigeria | ₦ NGN | Saved ₦12,400 today |
+| Brazil | R$ BRL | Saved R$89 today |
+| Indonesia | Rp IDR | Saved Rp156,000 today |
+| Pakistan | ₨ PKR | Saved ₨940 today |
 
 To manually set your currency:
 
@@ -217,7 +225,7 @@ To manually set your currency:
 corvyn currency
 ```
 
-Or in corvyn.config.toml:
+Or in `corvyn.config.toml`:
 
 ```toml
 [currency]
@@ -243,7 +251,7 @@ override = ""         # ISO 4217 code: INR, NGN, BRL, USD, EUR, etc.
 
 ```toml
 [budget]
-daily   = 30
+daily   = 30      # in your display currency
 weekly  = 150
 monthly = 500
 ```
@@ -254,36 +262,45 @@ monthly = 500
 [providers.ollama]
 enabled = true
 host    = "http://localhost:11434"
-models  = ["qwen2.5-coder:7b"]
+models  = ["qwen3:4b"]
 
-[providers.groq]
+[providers.gemini]
 enabled = true
-api_key = "gsk_..."
-models  = ["llama-3.3-70b-versatile"]
+api_key = "$GEMINI_API_KEY"
+rpm     = 15
+rpd     = 1500
+models  = ["gemini-2.5-flash"]
 
 [providers.openrouter]
 enabled     = true
-api_key     = "sk-or-..."
-free_models = ["nvidia/llama-3.1-nemotron-ultra-253b-v1:free", "minimax/minimax-m2.5:free"]
-paid_models = ["anthropic/claude-sonnet-4-20250514", "deepseek/deepseek-chat"]
+api_key     = "$OPENROUTER_API_KEY"
+free_models = ["qwen/qwen3-coder:free", "nvidia/nemotron-3-super-120b-a12b:free"]
+paid_models = ["anthropic/claude-sonnet-4.6", "deepseek/deepseek-chat-v3.1"]
+
+[providers.opencode_go]
+enabled = true
+api_key = "$OPENCODE_GO_API_KEY"
+models  = ["glm-5.1", "kimi-k2.6", "qwen3.6-plus", "deepseek-v4-pro"]
 
 [providers.anthropic]
 enabled = true
-api_key = "sk-ant-..."
+api_key = "$ANTHROPIC_API_KEY"
 models  = ["claude-sonnet-4-20250514"]
 ```
+
+API keys support env var resolution: `"$GEMINI_API_KEY"` or `"env:GEMINI_API_KEY"`.
 
 ### Routing
 
 ```toml
 [routing]
-security = ["anthropic", "openrouter-paid", "openrouter-free", "ollama"]
-complex  = ["openrouter-free", "openrouter-paid", "anthropic", "ollama"]
-generate = ["groq", "openrouter-free", "ollama"]
-test     = ["openrouter-free", "gemini", "groq", "ollama"]
-debug    = ["groq", "openrouter-free", "sambanova", "ollama"]
-medium   = ["groq", "openrouter-free", "gemini", "ollama"]
-simple   = ["cerebras", "groq", "openrouter-free", "ollama"]
+security = ["openrouter-free", "opencode-go", "openrouter-paid"]
+complex  = ["openrouter-free", "opencode-go", "openrouter-paid"]
+generate = ["openrouter-free", "opencode-go", "cerebras", "gemini"]
+test     = ["openrouter-free", "opencode-go", "gemini", "cerebras"]
+debug    = ["openrouter-free", "opencode-go", "cerebras", "gemini"]
+medium   = ["openrouter-free", "opencode-go", "gemini", "cerebras"]
+simple   = ["cerebras", "openrouter-free", "opencode-go", "gemini"]
 ```
 
 ## Architecture
@@ -295,11 +312,16 @@ server.ts → parse format (openai vs anthropic)
   ↓
 router.ts → routeRequest()
   1. classifyTask(rawInput) → TaskCategory
-  2. getRoutingOrderForTask(category, config) → Provider[]
-  3. Check rpm/rpd/tpm limits
-  4. Try providers in order (30s timeout each)
-  5. On success: increment quota, return stream
-  6. On failure: try next provider
+  2. detectMode(modelHint) → auto | free | paid
+  3. getRoutingOrderForTask(category, config) → Provider[]
+  4. Strip non-standard fields from messages
+  5. Loop providers in routing order:
+     a. Skip if disabled / no API key / no quota
+     b. Check rpm/rpd/tpm limits
+     c. tryProvider() → fetch with 30s timeout, stream SSE
+     d. On success: increment quota, log usage, return stream
+     e. On failure: log error, try next
+  6. Fallback: 503 with list of configured providers
 ```
 
 ### Provider Tiers
@@ -308,12 +330,26 @@ router.ts → routeRequest()
 |---|---|---|
 | free | Groq, Gemini, Cerebras, SambaNova, Mistral | rpm, rpd, tpm |
 | openrouter | OpenRouter free/paid models | server-side |
+| subscription | OpenCode Go, OpenCode Zen | server-side |
 | local | Ollama | unlimited |
 | paid | Anthropic, OpenAI, DeepSeek | none |
 
 ### Deduplication
 
-When both a direct API key and OpenRouter have the same model, the direct key wins (lower latency, no markup). Controlled by `deduplicate = true` in config. OpenRouter free models are never deduplicated.
+When both a direct API key and OpenRouter have the same model, the direct key wins (lower latency, no markup). OpenRouter free models are never deduplicated.
+
+## Tech Stack
+
+| Component | Technology |
+|---|---|
+| Runtime | Bun (`bun:sqlite`, `Bun.serve`) |
+| Language | TypeScript strict mode |
+| HTTP | Hono |
+| AI SDK | `openai` (raw OpenAI SDK) |
+| Database | bun:sqlite (WAL mode) |
+| Config | smol-toml |
+| CLI | Commander.js |
+| Classifier | TF-IDF + tiebreakers |
 
 ## Project Structure
 
@@ -328,26 +364,12 @@ corvyn/
 │   ├── deduplicator.ts  ← Conflict resolution
 │   ├── quota.ts         ← RPM/RPD/TPM tracking
 │   ├── currency.ts      ← Multi-currency support + exchange rates
-│   ├── classifier.ts    ← Task classification
+│   ├── classifier.ts    ← TF-IDF task classification
 │   └── db/
-│       ├── schema.ts    ← Database schema
-│       └── index.ts     ← bun:sqlite initialization
+│       └── index.ts     ← bun:sqlite initialization + schema
 ├── corvyn.config.toml   ← Default configuration
 └── package.json
 ```
-
-## Tech Stack
-
-| Component | Technology |
-|---|---|
-| Runtime | Bun (bun:sqlite, Bun.serve) |
-| Language | TypeScript strict mode |
-| HTTP | Hono |
-| AI SDK | Vercel AI SDK v4 (`ai`) |
-| Database | bun:sqlite (WAL mode) |
-| Config | smol-toml |
-| CLI | Commander.js |
-| Validation | Zod |
 
 ## Notes
 
@@ -356,7 +378,6 @@ corvyn/
 - Auto-resets at midnight local time
 - DB stored at `~/.corvyn/corvyn.db`
 - Zero telemetry — nothing leaves your machine except LLM API calls
-- `better-sqlite3` fails on Bun — uses `bun:sqlite` instead
 
 ## Contributing
 
@@ -373,19 +394,14 @@ Ways to contribute:
 git clone https://github.com/corvyn-ai/corvyn
 cd corvyn
 bun install
-bun start
+bun run src/index.ts start
 ```
 
-PRs welcome. Issues welcome. Stars welcome. 🚀
+PRs welcome. Issues welcome. Stars welcome.
 
-## Support & Sponsorship
+---
 
-CORVYN is free and open source forever.
+Built with ❤️ in Tamil Nadu, India.
+For the 45 million developers who deserve affordable AI tools.
 
-If CORVYN saves you money consider:
-- ⭐ Starring the repo
-- 🐛 Reporting bugs
-- 📢 Sharing with other developers
-- 💰 Sponsoring on GitHub Sponsors
-
-Built with ❤️ in Tamil Nadu, India. For developers everywhere who deserve affordable AI tools.
+[corvyn.cc](https://corvyn.cc)
