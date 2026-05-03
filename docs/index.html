@@ -1283,7 +1283,8 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
     </style>
 </head>
-<body>
+<body id="main-content">
+    <a href="#main-content" style="position:absolute;top:-40px;left:0;background:#171717;color:#fff;padding:8px;text-decoration:none;border-radius:0 0 8px 0;z-index:10000;transition:top .3s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Skip to content</a>
     <div class="scroll-progress" id="scrollProgress"></div>
     <div class="noise-overlay"></div>
     
@@ -1343,7 +1344,7 @@
                 </div>
                 <div class="hero-stat-divider"></div>
                 <div class="hero-stat">
-                    <span class="hero-stat-num">14+</span>
+                    <span class="hero-stat-num">15+</span>
                     <span class="hero-stat-label">Providers</span>
                 </div>
                 <div class="hero-stat-divider"></div>
@@ -1370,6 +1371,7 @@
                     <div class="dot dot-yellow"></div>
                     <div class="dot dot-green"></div>
                     <span class="terminal-title">corvyn — zsh</span>
+                    <button onclick="copyTerminal()" style="margin-left:auto;background:transparent;border:none;color:#737373;cursor:pointer;padding:4px 8px;border-radius:4px;font-size:0.75rem;" onmouseover="this.style.color='#e5e5e5'" onmouseout="this.style.color='#737373'">Copy</button>
                 </div>
                 <div class="terminal-body" id="terminal">
                     <div class="terminal-line"><span class="amber">$</span> corvyn start</div>
@@ -1384,7 +1386,7 @@
         <div class="container savings-content">
             <p class="savings-label animate-in">CORVYN USERS SAVED</p>
             <div class="savings-amount animate-in delay-1" id="savings-count">₹ 0</div>
-            <p class="savings-sub animate-in delay-2">in API costs this month</p>
+            <p class="savings-sub animate-in delay-2">example monthly savings with CORVYN</p>
             <div class="currency-switcher animate-in delay-2">
                 <button class="currency-btn active" data-currency="INR" data-symbol="₹">₹ INR</button>
                 <button class="currency-btn" data-currency="NGN" data-symbol="₦">₦ NGN</button>
@@ -1402,17 +1404,45 @@
             <div class="marquee-item"><i class="fas fa-bolt"></i> 100% Task Classification Accuracy</div>
             <div class="marquee-item"><i class="fas fa-shield-alt"></i> Zero Telemetry — Nothing Leaves Your Machine</div>
             <div class="marquee-item"><i class="fas fa-globe"></i> 60+ Currencies Supported</div>
-            <div class="marquee-item"><i class="fas fa-server"></i> 14 Providers · 40+ Models</div>
+            <div class="marquee-item"><i class="fas fa-server"></i> 15 Providers · 40+ Models</div>
             <div class="marquee-item"><i class="fas fa-bolt"></i> <0.1ms Task Classification</div>
             <div class="marquee-item"><i class="fas fa-code-branch"></i> MIT Licensed · Open Source</div>
             <div class="marquee-item"><i class="fas fa-bolt"></i> 100% Task Classification Accuracy</div>
             <div class="marquee-item"><i class="fas fa-shield-alt"></i> Zero Telemetry — Nothing Leaves Your Machine</div>
             <div class="marquee-item"><i class="fas fa-globe"></i> 60+ Currencies Supported</div>
-            <div class="marquee-item"><i class="fas fa-server"></i> 14 Providers · 40+ Models</div>
+            <div class="marquee-item"><i class="fas fa-server"></i> 15 Providers · 40+ Models</div>
             <div class="marquee-item"><i class="fas fa-bolt"></i> <0.1ms Task Classification</div>
             <div class="marquee-item"><i class="fas fa-code-branch"></i> MIT Licensed · Open Source</div>
         </div>
     </div>
+
+    <!-- WHO IS FOR -->
+    <section class="section" id="who-is-for">
+        <div class="container">
+            <div class="section-header">
+                <p class="section-label animate-in">Audience</p>
+                <h2 class="section-title animate-in delay-1">Who Is CORVYN For?</h2>
+                <p class="section-desc animate-in delay-2">Save on AI costs no matter your size or use case.</p>
+            </div>
+            <div class="bento-grid">
+                <div class="bento-card spotlight-card animate-in">
+                    <div class="bento-icon"><i class="fas fa-user"></i></div>
+                    <h3 class="bento-title">Indie Developers</h3>
+                    <p class="bento-desc">Build projects with free tiers. Handle 90% of tasks with Gemini, Mistral, and OpenRouter. Keep costs near zero while maintaining quality.</p>
+                </div>
+                <div class="bento-card spotlight-card animate-in delay-1">
+                    <div class="bento-icon"><i class="fas fa-rocket"></i></div>
+                    <h3 class="bento-title">Startups</h3>
+                    <p class="bento-desc">Scale from zero to millions of users intelligently. Route simple tasks to free tiers, hard tasks to your paid keys. Never surprise bills.</p>
+                </div>
+                <div class="bento-card spotlight-card animate-in delay-2">
+                    <div class="bento-icon"><i class="fas fa-building"></i></div>
+                    <h3 class="bento-title">Enterprise</h3>
+                    <p class="bento-desc">Centralize AI routing with policy controls. Track costs in your local currency. Maintain security while optimizing spending across teams.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- HOW IT WORKS -->
     <section class="section" id="how-it-works">
@@ -1448,7 +1478,7 @@
             <div class="section-header">
                 <p class="section-label animate-in">Integrations</p>
                 <h2 class="section-title animate-in delay-1">Every Free Model. Every Gateway. One Proxy.</h2>
-                <p class="section-desc animate-in delay-2">14 providers. 40+ models. One config file. Enable only what you have.</p>
+                <p class="section-desc animate-in delay-2">15 providers. 40+ models. One config file. Enable only what you have.</p>
             </div>
             <div class="providers-grid">
                 <div class="provider-card spotlight-card animate-in">
@@ -1479,7 +1509,7 @@
                         <span class="provider-name">OpenRouter</span>
                     </div>
                     <div class="provider-limit">25+ free models</div>
-                    <span class="provider-badge badge-free">FREE</span>
+                    <span class="provider-badge badge-gateway">GATEWAY</span>
                 </div>
                 <div class="provider-card spotlight-card animate-in delay-3">
                     <div class="provider-logo">
@@ -1489,9 +1519,19 @@
                         <span class="provider-name">OpenCode Zen</span>
                     </div>
                     <div class="provider-limit">Free + Pay-as-you-go</div>
-                    <span class="provider-badge badge-free">FREE</span>
+                    <span class="provider-badge badge-gateway">GATEWAY</span>
                 </div>
                 <div class="provider-card spotlight-card animate-in">
+                    <div class="provider-logo">
+                        <img src="https://www.google.com/s2/favicons?domain=opencode.ai&sz=64" alt="OpenCode Go" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>OG</span>'">
+                    </div>
+                    <div class="provider-header">
+                        <span class="provider-name">OpenCode Go</span>
+                    </div>
+                    <div class="provider-limit">$10/mo · 14 models</div>
+                    <span class="provider-badge badge-paid">PAID</span>
+                </div>
+                <div class="provider-card spotlight-card animate-in delay-1">
                     <div class="provider-logo">
                         <img src="https://www.google.com/s2/favicons?domain=ollama.com&sz=64" alt="Ollama" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>O</span>'">
                     </div>
@@ -1501,7 +1541,7 @@
                     <div class="provider-limit">Unlimited · Local</div>
                     <span class="provider-badge badge-local">LOCAL</span>
                 </div>
-                <div class="provider-card spotlight-card animate-in delay-1">
+                <div class="provider-card spotlight-card animate-in delay-2">
                     <div class="provider-logo">
                         <img src="https://www.google.com/s2/favicons?domain=groq.com&sz=64" alt="Groq" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>G</span>'">
                     </div>
@@ -1511,7 +1551,7 @@
                     <div class="provider-limit">Pay-per-token</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
-                <div class="provider-card spotlight-card animate-in delay-2">
+                <div class="provider-card spotlight-card animate-in delay-3">
                     <div class="provider-logo">
                         <img src="https://www.google.com/s2/favicons?domain=cerebras.ai&sz=64" alt="Cerebras" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>C</span>'">
                     </div>
@@ -1521,7 +1561,7 @@
                     <div class="provider-limit">Pay-per-token</div>
                     <span class="provider-badge badge-paid">PAID</span>
                 </div>
-                <div class="provider-card spotlight-card animate-in delay-3">
+                <div class="provider-card spotlight-card animate-in">
                     <div class="provider-logo">
                         <img src="https://www.google.com/s2/favicons?domain=sambanova.ai&sz=64" alt="SambaNova" onerror="this.parentElement.innerHTML='<span class=\'logo-fallback\'>S</span>'">
                     </div>
@@ -1953,6 +1993,29 @@
                 console.error('Copy failed', err);
             }
             document.body.removeChild(textArea);
+        }
+
+        // Copy terminal output
+        function copyTerminal() {
+            const terminalBody = document.getElementById('terminal');
+            const lines = terminalBody.querySelectorAll('.terminal-line');
+            let text = '';
+            lines.forEach(line => {
+                text += line.innerText + '\n';
+            });
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const btn = event.target;
+                    const original = btn.innerText;
+                    btn.innerText = 'Copied!';
+                    btn.style.color = '#4ade80';
+                    setTimeout(() => {
+                        btn.innerText = original;
+                        btn.style.color = '';
+                    }, 2000);
+                });
+            }
         }
 
         // Scroll animations
