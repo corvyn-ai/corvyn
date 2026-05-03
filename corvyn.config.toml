@@ -50,6 +50,11 @@ models    = ["gpt-oss-120b", "qwen-3-235b-a22b-instruct-2507", "zai-glm-4.7", "l
 # rpd       = 1000
 # tpm       = 100000
 # models    = ["mistral-small-latest"]
+# 
+[providers.kimi]
+enabled   = true
+api_key   = "$KIMI_API_KEY"
+models    = ["kimi-k2.6", "kimi-k2.5"]
 
 [providers.openrouter]
 enabled   = true

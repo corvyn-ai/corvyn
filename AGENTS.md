@@ -75,10 +75,10 @@ API keys support env var resolution: `api_key = "$GEMINI_API_KEY"` or `api_key =
 
 | Provider | Tier | Env/API Key | Rate Limits |
 |---|---|---|---|
-| Groq | free | $GROQ_API_KEY | rpm, rpd |
+| Groq | paid | $GROQ_API_KEY | pay-per-token |
 | Gemini | free | $GEMINI_API_KEY | rpm, rpd |
-| Cerebras | free | $CEREBRAS_API_KEY | rpm, rpd |
-| SambaNova | free | $SAMBANOVA_API_KEY | rpm, rpd |
+| Cerebras | paid | $CEREBRAS_API_KEY | pay-per-token |
+| SambaNova | paid | $SAMBANOVA_API_KEY | pay-per-token |
 | Mistral | free | $MISTRAL_API_KEY | rpm, rpd, tpm |
 | OpenRouter (free) | openrouter | $OPENROUTER_API_KEY | server-side |
 | OpenRouter (paid) | openrouter | $OPENROUTER_API_KEY | server-side |

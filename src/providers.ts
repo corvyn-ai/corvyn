@@ -23,6 +23,7 @@ const BASE_URLS: Record<string, string> = {
   mistral: 'https://api.mistral.ai/v1',
   openai: 'https://api.openai.com/v1',
   deepseek: 'https://api.deepseek.com/v1',
+  kimi: 'https://api.moonshot.ai/v1',
   openrouter: 'https://openrouter.ai/api/v1',
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai',
   ollama: 'http://localhost:11434/v1',
@@ -32,18 +33,12 @@ const BASE_URLS: Record<string, string> = {
 };
 
 const DEFAULT_RPM: Record<string, number> = {
-  groq: 30,
   gemini: 15,
-  cerebras: 30,
-  sambanova: 30,
   mistral: 15,
 };
 
 const DEFAULT_RPD: Record<string, number> = {
-  groq: 14400,
   gemini: 1500,
-  cerebras: 1700,
-  sambanova: 3000,
   mistral: 1000,
 };
 
@@ -52,6 +47,10 @@ function mapProviderTier(raw: string): ProviderTier {
     case 'anthropic':
     case 'openai':
     case 'deepseek':
+    case 'groq':
+    case 'cerebras':
+    case 'sambanova':
+    case 'kimi':
     case 'opencode-go':
     case 'opencode-zen':
       return 'paid';
@@ -71,12 +70,10 @@ export function getAvailableProviders(config: CorvynConfig): Provider[] {
   if (p.groq.enabled && p.groq.api_key !== '') {
     providers.push({
       name: 'groq',
-      tier: 'free',
+      tier: 'paid',
       baseUrl: BASE_URLS.groq!,
       apiKey: p.groq.api_key,
-      modelId: p.groq.models[0] ?? 'llama-3.3-70b-versatile',
-      rpm: p.groq.rpm ?? DEFAULT_RPM.groq,
-      rpd: p.groq.rpd ?? DEFAULT_RPD.groq,
+      modelId: p.groq.models[0] ?? 'openai/gpt-oss-120b',
     });
   }
 
@@ -95,24 +92,20 @@ export function getAvailableProviders(config: CorvynConfig): Provider[] {
   if (p.cerebras.enabled && p.cerebras.api_key !== '') {
     providers.push({
       name: 'cerebras',
-      tier: 'free',
+      tier: 'paid',
       baseUrl: BASE_URLS.cerebras!,
       apiKey: p.cerebras.api_key,
       modelId: p.cerebras.models[0] ?? 'llama3.1-70b',
-      rpm: p.cerebras.rpm ?? DEFAULT_RPM.cerebras,
-      rpd: p.cerebras.rpd ?? DEFAULT_RPD.cerebras,
     });
   }
 
   if (p.sambanova.enabled && p.sambanova.api_key !== '') {
     providers.push({
       name: 'sambanova',
-      tier: 'free',
+      tier: 'paid',
       baseUrl: BASE_URLS.sambanova!,
       apiKey: p.sambanova.api_key,
       modelId: p.sambanova.models[0] ?? 'Meta-Llama-3.3-70B-Instruct',
-      rpm: p.sambanova.rpm ?? DEFAULT_RPM.sambanova,
-      rpd: p.sambanova.rpd ?? DEFAULT_RPD.sambanova,
     });
   }
 
@@ -156,6 +149,16 @@ export function getAvailableProviders(config: CorvynConfig): Provider[] {
       baseUrl: BASE_URLS.deepseek!,
       apiKey: p.deepseek.api_key,
       modelId: p.deepseek.models[0] ?? 'deepseek-chat',
+    });
+  }
+
+  if (p.kimi.enabled && p.kimi.api_key !== '') {
+    providers.push({
+      name: 'kimi',
+      tier: 'paid',
+      baseUrl: BASE_URLS.kimi!,
+      apiKey: p.kimi.api_key,
+      modelId: p.kimi.models[0] ?? 'kimi-k2.6',
     });
   }
 
@@ -371,10 +374,10 @@ export function applyDeduplication(config: CorvynConfig): { config: CorvynConfig
 // ── Cost calculation ────────────────────────────────────────────────
 
 const PROVIDER_COSTS: Record<string, { input: number; output: number }> = {
-  groq: { input: 0, output: 0 },
+  groq: { input: 0.15, output: 0.60 },
   gemini: { input: 0, output: 0 },
-  cerebras: { input: 0, output: 0 },
-  sambanova: { input: 0, output: 0 },
+  cerebras: { input: 0.35, output: 0.75 },
+  sambanova: { input: 0.10, output: 0.30 },
   mistral: { input: 0, output: 0 },
   ollama: { input: 0, output: 0 },
   'opencode-go': { input: 0, output: 0 },
@@ -384,6 +387,7 @@ const PROVIDER_COSTS: Record<string, { input: number; output: number }> = {
   'gpt-4o': { input: 2.5, output: 10 },
   'gpt-4o-mini': { input: 0.15, output: 0.6 },
   deepseek: { input: 0.27, output: 1.1 },
+  kimi: { input: 0.60, output: 3.00 },
 };
 
 export function calculateCost(

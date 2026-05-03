@@ -101,6 +101,7 @@ export interface CorvynConfig {
     anthropic: PaidProviderConfig;
     openai: PaidProviderConfig;
     deepseek: PaidProviderConfig;
+    kimi: PaidProviderConfig;
     opencode_go: OpenCodeGoConfig;
     opencode_zen: OpenCodeZenConfig;
     ollama: OllamaConfig;
@@ -201,6 +202,7 @@ export function getDefaultConfig(): CorvynConfig {
       anthropic: DEFAULT_PAID,
       openai: DEFAULT_PAID,
       deepseek: DEFAULT_PAID,
+      kimi: DEFAULT_PAID,
       opencode_go: DEFAULT_OPENCODE_GO,
       opencode_zen: DEFAULT_OPENCODE_ZEN,
       ollama: DEFAULT_OLLAMA,
@@ -391,6 +393,7 @@ function mergeConfig(raw: Record<string, unknown>): CorvynConfig {
       anthropic: mergePaid(rawProviders.anthropic, def.providers.anthropic),
       openai: mergePaid(rawProviders.openai, def.providers.openai),
       deepseek: mergePaid(rawProviders.deepseek, def.providers.deepseek),
+      kimi: mergePaid(rawProviders.kimi, def.providers.kimi),
       opencode_go: mergeOpenCodeGo(rawProviders.opencode_go),
       opencode_zen: mergeOpenCodeZen(rawProviders.opencode_zen),
       ollama: mergeOllama(rawProviders.ollama),
@@ -414,6 +417,7 @@ export function getEnabledProviders(config: CorvynConfig): string[] {
   if (providers.anthropic.enabled && providers.anthropic.api_key !== '') enabled.push('anthropic');
   if (providers.openai.enabled && providers.openai.api_key !== '') enabled.push('openai');
   if (providers.deepseek.enabled && providers.deepseek.api_key !== '') enabled.push('deepseek');
+  if (providers.kimi.enabled && providers.kimi.api_key !== '') enabled.push('kimi');
   if (providers.opencode_go.enabled && providers.opencode_go.api_key !== '') enabled.push('opencode-go');
   if (providers.opencode_zen.enabled && providers.opencode_zen.api_key !== '') enabled.push('opencode-zen');
   if (providers.ollama.enabled) enabled.push('ollama');

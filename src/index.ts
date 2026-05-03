@@ -114,7 +114,7 @@ async function checkAllProviders(config: CorvynConfig): Promise<CheckedProvider[
 
   // Add configured-but-disabled providers as "missing"
   const freeNames = ['groq', 'gemini', 'cerebras', 'sambanova', 'mistral'] as const;
-  const paidNames = ['anthropic', 'openai', 'deepseek'] as const;
+  const paidNames = ['anthropic', 'openai', 'deepseek', 'kimi'] as const;
 
   for (const name of freeNames) {
     const c = config.providers[name];
@@ -511,6 +511,11 @@ models    = [
 # api_key   = "$DEEPSEEK_API_KEY"
 # models    = ["deepseek-chat"]
 
+# [providers.kimi]
+# enabled   = true
+# api_key   = "$KIMI_API_KEY"
+# models    = ["kimi-k2.6", "kimi-k2.5"]
+
 # ── Local ────────────────────────────────────────────────────────────
 
 # [providers.ollama]
@@ -599,7 +604,7 @@ async function interactiveInit(): Promise<void> {
   console.log('');
   console.log('Configuring providers...');
 
-  const prompts: Array<{ key: 'groq' | 'gemini' | 'cerebras' | 'sambanova' | 'mistral' | 'anthropic' | 'openai' | 'deepseek'; displayName: string; envHint: string }> = [
+  const prompts: Array<{ key: 'groq' | 'gemini' | 'cerebras' | 'sambanova' | 'mistral' | 'anthropic' | 'openai' | 'deepseek' | 'kimi'; displayName: string; envHint: string }> = [
     { key: 'groq', displayName: 'Groq', envHint: 'gsk_...' },
     { key: 'gemini', displayName: 'Gemini', envHint: 'AIza...' },
     { key: 'cerebras', displayName: 'Cerebras', envHint: 'csk-...' },
@@ -608,6 +613,7 @@ async function interactiveInit(): Promise<void> {
     { key: 'anthropic', displayName: 'Anthropic', envHint: 'sk-ant-...' },
     { key: 'openai', displayName: 'OpenAI', envHint: 'sk-...' },
     { key: 'deepseek', displayName: 'DeepSeek', envHint: 'sk-...' },
+    { key: 'kimi', displayName: 'Kimi', envHint: 'sk-...' },
   ];
 
   for (const p of prompts) {
