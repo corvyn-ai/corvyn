@@ -66,7 +66,12 @@ export function createServer(deps: ServerDeps): Hono {
     return c.json({
       object: 'list',
       data: [
-        { id: 'corvyn/proxy', object: 'model', owned_by: 'corvyn' },
+        { id: 'corvyn/auto', object: 'model', owned_by: 'corvyn' },
+        { id: 'corvyn/free', object: 'model', owned_by: 'corvyn' },
+        { id: 'corvyn/paid', object: 'model', owned_by: 'corvyn' },
+        { id: 'openai/auto', object: 'model', owned_by: 'corvyn' },
+        { id: 'openai/free', object: 'model', owned_by: 'corvyn' },
+        { id: 'openai/paid', object: 'model', owned_by: 'corvyn' },
       ],
     });
   });
