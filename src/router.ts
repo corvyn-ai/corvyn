@@ -455,12 +455,12 @@ export async function routeRequest(
     const reason = budget.dailyExceeded ? "daily" : budget.weeklyExceeded ? "weekly" : "monthly";
     const spend = budget.dailyExceeded ? budget.dailySpend : budget.weeklyExceeded ? budget.weeklySpend : budget.monthlySpend;
     const limit = budget.dailyExceeded ? budget.dailyLimit : budget.weeklyExceeded ? budget.weeklyLimit : budget.monthlyLimit;
-    console.log(`[CORVYN] ⊘ Budget exceeded — ${reason} limit $${limit.toFixed(2)} (spent $${spend.toFixed(2)})`);
+    console.log(`[CORVYN] ⊘ Budget exceeded — ${reason} limit ${currency.symbol}${limit.toFixed(2)} (spent ${currency.symbol}${spend.toFixed(2)})`);
 
     // Still allow free and local providers
     if (mode === "paid") {
       return new Response(
-        JSON.stringify({ error: { message: `Budget exceeded: ${reason} limit ($${limit.toFixed(2)}). Spent $${spend.toFixed(2)}. Use corvyn/free or wait for reset.`, type: "budget_exceeded" } }),
+        JSON.stringify({ error: { message: `Budget exceeded: ${reason} limit (${currency.symbol}${limit.toFixed(2)}). Spent ${currency.symbol}${spend.toFixed(2)}. Use corvyn/free or wait for reset.`, type: "budget_exceeded" } }),
         { status: 429, headers: { "Content-Type": "application/json" } },
       );
     }

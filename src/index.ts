@@ -699,10 +699,11 @@ program
       const pctDaily = b.dailyLimit > 0 ? Math.round((b.dailySpend / b.dailyLimit) * 100) : 0;
       const pctWeekly = b.weeklyLimit > 0 ? Math.round((b.weeklySpend / b.weeklyLimit) * 100) : 0;
       const pctMonthly = b.monthlyLimit > 0 ? Math.round((b.monthlySpend / b.monthlyLimit) * 100) : 0;
-      const warn = (exceeded: boolean) => exceeded ? ' ⚠ EXCEEDED' : '';
-      console.log(`  Budget (daily):  ${formatCost(b.dailySpend, currencyInfo)} / ${formatCost(b.dailyLimit, currencyInfo)} (${pctDaily}%)${warn(b.dailyExceeded)}`);
-      console.log(`  Budget (weekly): ${formatCost(b.weeklySpend, currencyInfo)} / ${formatCost(b.weeklyLimit, currencyInfo)} (${pctWeekly}%)${warn(b.weeklyExceeded)}`);
-      console.log(`  Budget (month):  ${formatCost(b.monthlySpend, currencyInfo)} / ${formatCost(b.monthlyLimit, currencyInfo)} (${pctMonthly}%)${warn(b.monthlyExceeded)}`);
+      const warn = (exceeded: boolean) => exceeded ? ' \u26a0 EXCEEDED' : '';
+      const localFmt = { ...currencyInfo, rate: 1 };
+      console.log(`  Budget (daily):  ${formatCost(b.dailySpend, localFmt)} / ${formatCost(b.dailyLimit, localFmt)} (${pctDaily}%)${warn(b.dailyExceeded)}`);
+      console.log(`  Budget (weekly): ${formatCost(b.weeklySpend, localFmt)} / ${formatCost(b.weeklyLimit, localFmt)} (${pctWeekly}%)${warn(b.weeklyExceeded)}`);
+      console.log(`  Budget (month):  ${formatCost(b.monthlySpend, localFmt)} / ${formatCost(b.monthlyLimit, localFmt)} (${pctMonthly}%)${warn(b.monthlyExceeded)}`);
       console.log('');
     } catch (error) {
       console.error('Failed to get stats:', error);

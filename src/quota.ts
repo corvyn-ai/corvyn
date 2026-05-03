@@ -267,18 +267,19 @@ export function checkBudget(
   const weekStart = getStartOfWeek();
   const monthStart = getStartOfMonth();
 
+  // Budget limits are in local currency, so compare against cost_local
   const dailyRow = db
-    .prepare('SELECT COALESCE(SUM(cost_usd), 0) as total FROM daily_stats WHERE date = ?')
+    .prepare('SELECT COALESCE(SUM(cost_local), 0) as total FROM daily_stats WHERE date = ?')
     .get(today) as { total: number } | undefined;
   const dailySpend = dailyRow?.total ?? 0;
 
   const weeklyRow = db
-    .prepare('SELECT COALESCE(SUM(cost_usd), 0) as total FROM daily_stats WHERE date >= ?')
+    .prepare('SELECT COALESCE(SUM(cost_local), 0) as total FROM daily_stats WHERE date >= ?')
     .get(weekStart) as { total: number } | undefined;
   const weeklySpend = weeklyRow?.total ?? 0;
 
   const monthlyRow = db
-    .prepare('SELECT COALESCE(SUM(cost_usd), 0) as total FROM daily_stats WHERE date >= ?')
+    .prepare('SELECT COALESCE(SUM(cost_local), 0) as total FROM daily_stats WHERE date >= ?')
     .get(monthStart) as { total: number } | undefined;
   const monthlySpend = monthlyRow?.total ?? 0;
 
