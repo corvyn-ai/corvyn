@@ -111,12 +111,13 @@ function parseAnthropicRequest(body: Record<string, unknown>): ParsedRequest {
         if (block.type === "text" && typeof block.text === "string") {
           textParts.push(block.text);
         } else if (block.type === "tool_use") {
+          const rawInput = block.input ?? {};
           toolCalls.push({
             id: block.id,
             type: "function",
             function: {
               name: block.name,
-              arguments: JSON.stringify(block.input ?? {}),
+              arguments: typeof rawInput === "string" ? rawInput : JSON.stringify(rawInput),
             },
           });
         }
@@ -358,8 +359,10 @@ function convertOpenAIToAnthropicStream(body: ReadableStream<Uint8Array>, modelI
   const dec = new TextDecoder();
   const msgId = `msg_corvyn_${Date.now()}`;
   let buf = "";
-  let blockStarted = false;
+  let textBlockOpen = false;
   let blockIdx = 0;
+  // Track active tool call blocks by OpenAI tool call index
+  const activeToolBlocks = new Map<number, { anthropicIdx: number; id: string; name: string }>();
 
   return new ReadableStream({
     async start(controller) {
@@ -368,6 +371,7 @@ function convertOpenAIToAnthropicStream(body: ReadableStream<Uint8Array>, modelI
       })}\n\n`));
 
       const reader = body.getReader();
+      let stopReason = "end_turn";
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -383,40 +387,90 @@ function convertOpenAIToAnthropicStream(body: ReadableStream<Uint8Array>, modelI
               const chunk = JSON.parse(data) as Record<string, unknown>;
               const choices = chunk.choices as Array<Record<string, unknown>> | undefined;
               if (!choices?.[0]) continue;
-              const delta = choices[0].delta as Record<string, unknown> | undefined;
-              if (!delta) continue;
-              if (typeof delta.content === "string" && delta.content.length > 0) {
-                if (!blockStarted) {
-                  blockStarted = true;
-                  controller.enqueue(enc.encode(`event: content_block_start\ndata: ${JSON.stringify({ type: "content_block_start", index: blockIdx, content_block: { type: "text", text: "" } })}\n\n`));
+              const choice = choices[0];
+              const delta = choice.delta as Record<string, unknown> | undefined;
+              const finishReason = choice.finish_reason as string | null | undefined;
+
+              if (delta) {
+                // ── Text content ──
+                if (typeof delta.content === "string" && delta.content.length > 0) {
+                  if (!textBlockOpen) {
+                    textBlockOpen = true;
+                    controller.enqueue(enc.encode(`event: content_block_start\ndata: ${JSON.stringify({ type: "content_block_start", index: blockIdx, content_block: { type: "text", text: "" } })}\n\n`));
+                  }
+                  controller.enqueue(enc.encode(`event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", index: blockIdx, delta: { type: "text_delta", text: delta.content } })}\n\n`));
                 }
-                controller.enqueue(enc.encode(`event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", index: blockIdx, delta: { type: "text_delta", text: delta.content } })}\n\n`));
-              }
-              if (Array.isArray(delta.tool_calls)) {
-                for (const tc of delta.tool_calls as Array<Record<string, unknown>>) {
-                  const fn = tc.function as Record<string, unknown> | undefined;
-                  if (fn?.name) {
-                    if (blockStarted) {
-                      controller.enqueue(enc.encode(`event: content_block_stop\ndata: ${JSON.stringify({ type: "content_block_stop", index: blockIdx })}\n\n`));
+
+                // ── Tool calls (streamed incrementally by OpenAI) ──
+                if (Array.isArray(delta.tool_calls)) {
+                  for (const tc of delta.tool_calls as Array<Record<string, unknown>>) {
+                    const tcIdx = (tc.index as number) ?? 0;
+                    const fn = tc.function as Record<string, unknown> | undefined;
+
+                    // New tool call: has id + function.name
+                    if (tc.id && fn?.name) {
+                      // Close text block if open
+                      if (textBlockOpen) {
+                        controller.enqueue(enc.encode(`event: content_block_stop\ndata: ${JSON.stringify({ type: "content_block_stop", index: blockIdx })}\n\n`));
+                        blockIdx++;
+                        textBlockOpen = false;
+                      }
+
+                      const toolBlockIdx = blockIdx;
+                      activeToolBlocks.set(tcIdx, { anthropicIdx: toolBlockIdx, id: tc.id as string, name: fn.name as string });
+
+                      // Emit content_block_start with empty input (args stream via deltas)
+                      controller.enqueue(enc.encode(`event: content_block_start\ndata: ${JSON.stringify({
+                        type: "content_block_start",
+                        index: toolBlockIdx,
+                        content_block: { type: "tool_use", id: tc.id, name: fn.name, input: {} },
+                      })}\n\n`));
                       blockIdx++;
-                      blockStarted = false;
+
+                      // If this first chunk also carries argument data, emit it
+                      if (typeof fn.arguments === "string" && fn.arguments.length > 0) {
+                        controller.enqueue(enc.encode(`event: content_block_delta\ndata: ${JSON.stringify({
+                          type: "content_block_delta",
+                          index: toolBlockIdx,
+                          delta: { type: "input_json_delta", partial_json: fn.arguments },
+                        })}\n\n`));
+                      }
+                    } else if (fn && typeof fn.arguments === "string" && fn.arguments.length > 0) {
+                      // Continuation chunk: just argument fragments
+                      const active = activeToolBlocks.get(tcIdx);
+                      if (active) {
+                        controller.enqueue(enc.encode(`event: content_block_delta\ndata: ${JSON.stringify({
+                          type: "content_block_delta",
+                          index: active.anthropicIdx,
+                          delta: { type: "input_json_delta", partial_json: fn.arguments },
+                        })}\n\n`));
+                      }
                     }
-                    let input = {};
-                    try { input = JSON.parse((fn.arguments as string) ?? "{}"); } catch {}
-                    controller.enqueue(enc.encode(`event: content_block_start\ndata: ${JSON.stringify({ type: "content_block_start", index: blockIdx, content_block: { type: "tool_use", id: tc.id, name: fn.name, input } })}\n\n`));
-                    controller.enqueue(enc.encode(`event: content_block_stop\ndata: ${JSON.stringify({ type: "content_block_stop", index: blockIdx })}\n\n`));
-                    blockIdx++;
                   }
                 }
+              }
+
+              // ── Finish reason ──
+              if (finishReason === "tool_calls") {
+                stopReason = "tool_use";
+              } else if (finishReason === "stop") {
+                stopReason = "end_turn";
               }
             } catch {}
           }
         }
       } finally { reader.releaseLock(); }
-      if (blockStarted) {
+
+      // Close any open text block
+      if (textBlockOpen) {
         controller.enqueue(enc.encode(`event: content_block_stop\ndata: ${JSON.stringify({ type: "content_block_stop", index: blockIdx })}\n\n`));
       }
-      controller.enqueue(enc.encode(`event: message_delta\ndata: ${JSON.stringify({ type: "message_delta", delta: { stop_reason: "end_turn", stop_sequence: null }, usage: { output_tokens: 0 } })}\n\n`));
+      // Close any open tool blocks
+      for (const [, tb] of activeToolBlocks) {
+        controller.enqueue(enc.encode(`event: content_block_stop\ndata: ${JSON.stringify({ type: "content_block_stop", index: tb.anthropicIdx })}\n\n`));
+      }
+
+      controller.enqueue(enc.encode(`event: message_delta\ndata: ${JSON.stringify({ type: "message_delta", delta: { stop_reason: stopReason, stop_sequence: null }, usage: { output_tokens: 0 } })}\n\n`));
       controller.enqueue(enc.encode(`event: message_stop\ndata: ${JSON.stringify({ type: "message_stop" })}\n\n`));
       controller.close();
     },
