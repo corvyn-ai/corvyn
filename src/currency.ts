@@ -326,7 +326,9 @@ export function updateCurrencyOverride(configPath: string, code: string): boolea
   const content = fs.readFileSync(configPath, 'utf-8');
   const lines = content.split('\n');
   let inCurrency = false;
-  let found = false;
+  let foundOverride = false;
+  let foundMode = false;
+  let currencySectionEnd = -1;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!;
@@ -335,19 +337,27 @@ export function updateCurrencyOverride(configPath: string, code: string): boolea
       continue;
     }
     if (inCurrency && line.trim().startsWith('[')) {
+      currencySectionEnd = i;
       break;
+    }
+    if (inCurrency && line.trim().startsWith('mode')) {
+      lines[i] = `mode = "manual"`;
+      foundMode = true;
     }
     if (inCurrency && line.trim().startsWith('override')) {
       lines[i] = `override = "${code}"`;
-      found = true;
-      break;
+      foundOverride = true;
     }
   }
 
-  if (!found && inCurrency) {
+  // If fields were missing, insert them after [currency]
+  if (inCurrency && (!foundOverride || !foundMode)) {
     for (let i = 0; i < lines.length; i++) {
       if (lines[i]!.trim().startsWith('[currency]')) {
-        lines.splice(i + 1, 0, `override = "${code}"`);
+        const toInsert: string[] = [];
+        if (!foundMode) toInsert.push(`mode = "manual"`);
+        if (!foundOverride) toInsert.push(`override = "${code}"`);
+        lines.splice(i + 1, 0, ...toInsert);
         break;
       }
     }
