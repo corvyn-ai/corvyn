@@ -1,0 +1,179 @@
+# CORVYN Configuration
+# Copy to ~/.corvyn/corvyn.config.toml or keep in project root
+
+[currency]
+mode = "manual"
+override = "INR"
+
+[budget]
+daily = 30
+weekly = 150
+monthly = 500
+
+# [providers.ollama]
+# enabled = true
+# host = "http://localhost:11434"
+# models = ["qwen3:4b"]
+
+# [providers.groq]
+# enabled   = true
+# api_key   = "gsk_..."
+# rpm       = 30
+# rpd       = 14400
+# models    = ["llama-3.3-70b-versatile"]
+
+[providers.gemini]
+enabled   = true
+api_key   = "$GEMINI_API_KEY"
+rpm       = 15
+rpd       = 1500
+models    = ["gemini-2.5-flash"]
+
+[providers.cerebras]
+enabled   = true
+api_key   = "$CEREBRAS_API_KEY"
+rpm       = 30
+rpd       = 1700
+models    = ["gpt-oss-120b", "qwen-3-235b-a22b-instruct-2507", "zai-glm-4.7", "llama3.1-8b"]
+
+# [providers.sambanova]
+# enabled   = true
+# api_key   = "..."
+# rpm       = 30
+# rpd       = 3000
+# models    = ["Meta-Llama-3.3-70B-Instruct"]
+
+# [providers.mistral]
+# enabled   = true
+# api_key   = "..."
+# rpm       = 15
+# rpd       = 1000
+# tpm       = 100000
+# models    = ["mistral-small-latest"]
+
+[providers.openrouter]
+enabled   = true
+api_key   = "$OPENROUTER_API_KEY"
+free_models = [
+  # Tier 1 — Best for coding
+  "qwen/qwen3-coder:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "tencent/hy3-preview:free",
+  "openai/gpt-oss-120b:free",
+  # Tier 2 — Good fallbacks
+  "z-ai/glm-4.5-air:free",
+  "qwen/qwen3-next-80b-a3b-instruct:free",
+  "google/gemma-4-31b-it:free",
+  "minimax/minimax-m2.5:free",
+  "poolside/laguna-m.1:free",
+  # Tier 3 — Small/fast
+  "google/gemma-4-26b-a4b-it:free",
+  "meta-llama/llama-3.3-70b-instruct:free",
+  "openai/gpt-oss-20b:free",
+  "google/gemma-3-12b-it:free",
+]
+paid_models = [
+  # ── Cheap tier ($0.05-$0.30/M input) ──
+  "openai/gpt-5-nano",                  # $0.05/$0.40 — cheapest
+  "qwen/qwen3-235b-a22b-2507",          # $0.07/$0.10 — insane value, 262K ctx
+  "qwen/qwen3-coder-next",              # $0.12/$0.80 — best cheap coder
+  "deepseek/deepseek-chat-v3.1",        # $0.15/$0.75 — latest deepseek
+  "qwen/qwen3-coder-flash",             # $0.20/$0.97 — fast coder, 1M ctx
+  "openai/gpt-5.4-nano",                # $0.20/$1.25 — latest OpenAI nano
+  "openai/gpt-5-mini",                  # $0.25/$2.00 — good balance
+  # ── Mid tier ($0.30-$2.00/M input) ──
+  "google/gemini-2.5-flash",            # $0.30/$2.50 — 1M ctx, fast
+  "google/gemini-3-flash-preview",      # $0.50/$3.00 — latest Gemini
+  "deepseek/deepseek-r1-0528",          # $0.50/$2.15 — latest reasoning
+  "qwen/qwen3-coder-plus",              # $0.65/$3.25 — strong coder, 1M ctx
+  "openai/gpt-5.4-mini",                # $0.75/$4.50 — latest OpenAI mini
+  "openai/gpt-5",                       # $1.25/$10.00 — strong all-round
+  "google/gemini-2.5-pro",              # $1.25/$10.00 — 1M ctx, strong
+  # ── Premium tier ($2.00+/M input) ──
+  "google/gemini-3.1-pro-preview",      # $2.00/$12.00 — latest Gemini Pro
+  "anthropic/claude-sonnet-4.6",        # $3.00/$15.00 — latest Sonnet
+  "anthropic/claude-sonnet-4.5",        # $3.00/$15.00 — strong fallback
+  "anthropic/claude-opus-4.7",          # $5.00/$25.00 — latest Opus
+  "openai/gpt-5.5",                     # $5.00/$30.00 — latest GPT
+]
+
+# [providers.anthropic]
+# enabled   = true
+# api_key   = "sk-ant-..."
+# models    = ["claude-sonnet-4-20250514"]
+
+# [providers.openai]
+# enabled   = true
+# api_key   = "sk-..."
+# models    = ["gpt-4o"]
+
+# [providers.deepseek]
+# enabled   = true
+# api_key   = "sk-..."
+# models    = ["deepseek-chat"]
+
+[providers.opencode_go]
+enabled   = true
+api_key   = "$OPENCODE_GO_API_KEY"
+models    = [
+  "glm-5",
+  "glm-5.1",
+  "kimi-k2.5",
+  "kimi-k2.6",
+  "mimo-v2-pro",
+  "mimo-v2-omni",
+  "mimo-v2.5-pro",
+  "mimo-v2.5",
+  "minimax-m2.5",
+  "minimax-m2.7",
+  "qwen3.5-plus",
+  "qwen3.6-plus",
+  "deepseek-v4-pro",
+  "deepseek-v4-flash",
+]
+
+# [providers.opencode_zen]
+# enabled   = true
+# api_key   = "your-opencode-zen-api-key"
+# free_models = [
+#   "big-pickle",
+#   "minimax-m2.5-free",
+#   "nemotron-3-super-free",
+#   "hy3-preview-free",
+# ]
+# paid_models = [
+#   "qwen3.5-plus",
+#   "qwen3.6-plus",
+#   "minimax-m2.7",
+#   "kimi-k2.6",
+#   "glm-5.1",
+# ]
+
+[routing]
+# Priority: free tiers → opencode-go (subscription) → paid fallbacks
+security = ["openrouter-free", "opencode-go", "openrouter-paid"]
+complex  = ["openrouter-free", "opencode-go", "openrouter-paid"]
+generate = ["openrouter-free", "opencode-go", "cerebras", "gemini"]
+test     = ["openrouter-free", "opencode-go", "gemini", "cerebras"]
+debug    = ["openrouter-free", "opencode-go", "cerebras", "gemini"]
+medium   = ["openrouter-free", "opencode-go", "gemini", "cerebras"]
+simple   = ["cerebras", "openrouter-free", "opencode-go", "gemini"]
+
+[routing.openrouter_models]
+# Best model per task — primary pick, fallbacks come from free_models list
+free_security = "qwen/qwen3-coder:free"
+free_complex  = "nvidia/nemotron-3-super-120b-a12b:free"
+free_generate = "qwen/qwen3-coder:free"
+free_test     = "qwen/qwen3-coder:free"
+free_debug    = "nvidia/nemotron-3-super-120b-a12b:free"
+free_medium   = "z-ai/glm-4.5-air:free"
+free_simple   = "google/gemma-4-26b-a4b-it:free"
+free_fallback = "openai/gpt-oss-120b:free"
+
+paid_security = "anthropic/claude-sonnet-4.6"
+paid_complex  = "anthropic/claude-opus-4.7"
+paid_generate = "qwen/qwen3-coder-next"
+paid_test     = "deepseek/deepseek-chat-v3.1"
+paid_debug    = "google/gemini-flash-latest"
+paid_medium   = "qwen/qwen3-235b-a22b-2507"
+paid_simple   = "openai/gpt-5-nano"

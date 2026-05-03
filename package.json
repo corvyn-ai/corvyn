@@ -1,0 +1,31 @@
+{
+  "name": "corvyn",
+  "version": "0.1.0",
+  "description": "AI cost router for every developer",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "corvyn": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "bun --watch src/index.ts start",
+    "start": "bun run src/index.ts start",
+    "stats": "bun run src/index.ts stats",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "hono": "^4.6.0",
+    "smol-toml": "^1.3.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.13",
+    "tsup": "^8.5.1",
+    "typescript": "^5.6.0"
+  }
+}
