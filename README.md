@@ -404,4 +404,3 @@ PRs welcome. Issues welcome. Stars welcome.
 Built with ❤️ in Tamil Nadu, India.
 For the 45 million developers who deserve affordable AI tools.
 
-[corvyn.cc](https://corvyn.cc)
