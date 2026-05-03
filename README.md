@@ -146,6 +146,38 @@ Budget (weekly): ₹232.06 / ₹150.00 (2%)
 Budget (month):  ₹232.06 / ₹500.00 (0%)
 ```
 
+## Connecting to Claude Code
+
+CORVYN intercepts all Claude Code requests and routes them to free models automatically.
+
+### Step 1 — Start CORVYN
+
+```bash
+corvyn start
+```
+
+### Step 2 — Run Claude Code with CORVYN
+
+```bash
+ANTHROPIC_BASE_URL=http://localhost:4000 claude
+```
+
+### Permanent Setup
+
+Add to `~/.zshrc` or `~/.bashrc`:
+
+```bash
+export ANTHROPIC_BASE_URL=http://localhost:4000
+```
+
+Then just run:
+
+```bash
+claude
+```
+
+CORVYN handles the rest — free routing, cost tracking, everything.
+
 ## Classifier
 
 TF-IDF + tiebreaker rules. Zero ML models. Zero API calls. Pure TypeScript.
